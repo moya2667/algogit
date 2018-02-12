@@ -1,4 +1,4 @@
-package ½´ÆÛÄÚµù20211;
+package ìŠˆí¼ì½”ë”©20211;
 
 import static org.junit.Assert.*;
 
@@ -6,9 +6,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ½´ÆÛÄÚµù20211.ÇØ½¬µğºñ.DB.nodeinfo;
+import ìŠˆí¼ì½”ë”©20211.í•´ì‰¬ë””ë¹„.DB.nodeinfo;
 
-public class ÇØ½¬µğºñ {
+public class í•´ì‰¬ë””ë¹„ {
 
 	@Before
 	public void setUp() throws Exception {
@@ -29,6 +29,31 @@ public class ÇØ½¬µğºñ {
 		
 		DB db = new DB();
 		
+		for (int i = 0 ; i < 10000; i ++) { 
+			if (i == 9999){
+				System.out.println("test");
+			}
+			
+			if ( !db.add(String.valueOf(i).toCharArray(), (String.valueOf(i)).toCharArray() )){
+				System.out.println("fail to add = " +  i);
+			}
+		}
+		
+		for (int i = 0 ; i < 10000; i ++) { 
+			if (i == 9999){
+				System.out.println("test");
+			}
+			
+			nodeinfo in = (nodeinfo)db.find(String.valueOf(i).toCharArray());
+			if (in == null){
+				System.out.println("nod found key");
+			}
+			
+			System.out.println(String.valueOf(in.t));
+		}
+		
+		
+		/*
 		db.add("key".toCharArray(), "data".toCharArray()); 
 		db.add("key1".toCharArray(), "databb".toCharArray());
 		nodeinfo in = (nodeinfo)db.find("key".toCharArray());
@@ -40,19 +65,20 @@ public class ÇØ½¬µğºñ {
 		
 		db.delete("key".toCharArray());		
 		Object t = db.find("key".toCharArray());
+		*/
 		
 	}
 	
 	class DB {
 		
-		Hashtable hs = new Hashtable(4096);
+		Hashtable hs = new Hashtable(15000);
 
 		int addcnt = 0 ; 
 		public boolean add(char[] charArray, char[] charArray2) {
 			// TODO Auto-generated method stub
 			nodeinfo info = new nodeinfo(charArray2 , addcnt++);
-			hs.add(charArray, info);
-			return true;
+			return hs.add(charArray, info);
+			
 		}
 
 		public Object find(char[] charArray) {
