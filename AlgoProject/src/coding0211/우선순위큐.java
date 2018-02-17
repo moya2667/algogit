@@ -1,4 +1,4 @@
-package ÄÚµù0211;
+package coding0211;
 
 import java.util.Scanner;
 

@@ -1,4 +1,4 @@
-package 코딩0211;
+package coding0211;
 
 import static org.junit.Assert.*;
 
@@ -6,7 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import 코딩0211.해쉬디비.DB.nodeinfo;
+import coding0211.해쉬디비.DB.nodeinfo;
 
 public class 해쉬디비 {
 
