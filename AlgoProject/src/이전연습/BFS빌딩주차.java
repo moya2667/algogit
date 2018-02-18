@@ -118,8 +118,7 @@ xoo+xx
 						q.add(new node(y,x,dir , distance+1));
 						print();
 					}
-				}
-				
+				}				
 				//교차로 일경우 
 				else if ( map[t.y][t.x] == '+'){
 					//동서남북 다 넣기

@@ -154,6 +154,7 @@ public class 해쉬디비 {
 				return null;
 			}
 			
+			// char 비교할경우 코드 
 			private boolean isCharSame(char[] t , char[] b) { 
 				
 				for ( int i = 0 ; i < t.length ; i++) {
