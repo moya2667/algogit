@@ -2,13 +2,16 @@ package coding0211;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import coding0211.ÇØ½¬µðºñ.DB.nodeinfo;
+import coding0211.Hash.DB.nodeinfo;
 
-public class ÇØ½¬µðºñ {
+
+public class Hash {
 
 	@Before
 	public void setUp() throws Exception {
@@ -23,33 +26,37 @@ public class ÇØ½¬µðºñ {
 		char[] a = {'1','2','3'};				
 		System.out.println("a = " + String.valueOf(a));		
 	}
-
+	@Test
+	public void hashtest(){
+		HashMap t = new HashMap<>();
+		for (int i = 0 ; i < 10000 ; i++) {
+			t.put(i, i);
+		}
+		
+		for (int i = 0 ; i < 10000 ; i++) {
+			System.out.println(t.get(i));
+		}
+	}
+	
 	@Test
 	public void test() {
 		
 		DB db = new DB();
 		
-		for (int i = 0 ; i < 10000; i ++) { 
-			if (i == 9999){
-				System.out.println("test");
-			}
+		for (int i = 0 ; i < 20000; i ++) {
 			
-			if ( !db.add(String.valueOf(i).toCharArray(), (String.valueOf(i)).toCharArray() )){
+			if ( !db.add(String.valueOf(i).toCharArray(), i )){
 				System.out.println("fail to add = " +  i);
 			}
 		}
 		
-		for (int i = 0 ; i < 10000; i ++) { 
-			if (i == 9999){
-				System.out.println("test");
-			}
-			
+		for (int i = 0 ; i < 20000; i ++) {
 			nodeinfo in = (nodeinfo)db.find(String.valueOf(i).toCharArray());
 			if (in == null){
 				System.out.println("nod found key");
 			}
 			
-			System.out.println(String.valueOf(in.t));
+			System.out.println(String.valueOf(in.idx));
 		}
 		
 		
@@ -71,12 +78,12 @@ public class ÇØ½¬µðºñ {
 	
 	class DB {
 		
-		Hashtable hs = new Hashtable(15000);
+		Hashtable hs = new Hashtable(20000);
 
 		int addcnt = 0 ; 
-		public boolean add(char[] charArray, char[] charArray2) {
+		public boolean add(char[] charArray, int idx) {
 			// TODO Auto-generated method stub
-			nodeinfo info = new nodeinfo(charArray2 , addcnt++);
+			nodeinfo info = new nodeinfo(charArray , idx);
 			return hs.add(charArray, info);
 			
 		}
@@ -141,11 +148,14 @@ public class ÇØ½¬µðºñ {
 			}
 			
 			public nodeinfo find(char[] key){
+				
 				int h = hash(key);
-				int cnt = capacity;				
+				int cnt = capacity;
+				
 				while(tb[h].key != null && (--cnt) != 0)
 				{
-					if ( isCharSame(tb[h].key , key)) { 
+					
+					if ( isCharSame(key , tb[h].key )) { 
 						return tb[h].info;
 					}
 					
@@ -154,8 +164,10 @@ public class ÇØ½¬µðºñ {
 				return null;
 			}
 			
-			// char ºñ±³ÇÒ°æ¿ì ÄÚµå 
+			// char ï¿½ï¿½ï¿½Ò°ï¿½ï¿½ ï¿½Úµï¿½ 
 			private boolean isCharSame(char[] t , char[] b) { 
+				
+				if ( t.length != b.length) return false;
 				
 				for ( int i = 0 ; i < t.length ; i++) {
 					if ( t[i] != b[i] ) return false; 
@@ -181,7 +193,7 @@ public class ÇØ½¬µðºñ {
 			
 			
 			boolean add(char[] key, nodeinfo data)
-			{
+			{				
 				int h = hash(key);				
 				while(tb[h].key != null)
 				{
@@ -189,7 +201,8 @@ public class ÇØ½¬µðºñ {
 						return false;
 					}
 					h = (h + 1) % capacity;
-				}
+				}				
+				
 				tb[h].key = key;
 				tb[h].info = data;
 				return true;
