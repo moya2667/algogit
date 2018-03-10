@@ -8,10 +8,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import coding0211.Hash.DB.nodeinfo;
+import coding0211.HashTest.DB.nodeinfo;
 
 
-public class Hash {
+public class HashTest {
 
 	@Before
 	public void setUp() throws Exception {
