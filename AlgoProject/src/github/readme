@@ -15,3 +15,6 @@ git remote -v
 git merge upstream/master
 
 if github code change 
+
+//신규 브랜치에서 원본저장소에 있는 소스 댕겨오는거
+git pull origin master
