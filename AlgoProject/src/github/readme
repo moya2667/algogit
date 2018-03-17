@@ -1,11 +1,13 @@
-1. branch »ý¼º¹æ¹ý 
-2. git ¸í·É¾î 
+1. branch Â»Ã½Â¼ÂºÂ¹Ã¦Â¹Ã½ 
+2. git Â¸Ã­Â·Ã‰Â¾Ã® 
 git checkout master 
 git checkout xxx 
 
-origin : º°¸í 
+origin : ÂºÂ°Â¸Ã­ 
 
 reference site 
 https://wayhome25.github.io/git/2017/07/08/git-first-pull-request-story/
  
 http://lifove.tistory.com/54
+
+if github code change 
