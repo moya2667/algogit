@@ -1,6 +1,6 @@
 package coding0318;
 
-import coding0318.바람아멈추어다오.RESULT;
+import coding0318.stopwind.RESULT;
 
 public class user {
 	int MAX_N = 100;
