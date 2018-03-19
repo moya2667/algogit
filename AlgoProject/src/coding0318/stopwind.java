@@ -2,7 +2,7 @@ package coding0318;
 
 import java.util.Scanner;
 
-public class 바람아멈추어다오 {
+public class stopwind {
 	static int CMD_SETUPFLAGS = 1;
 	static int CMD_WIND = 0;
 	static int CMD_END = 99;
@@ -25,7 +25,23 @@ public class 바람아멈추어다오 {
 	};
 	
 	static Scanner sc = new Scanner(System.in);
+	
+	static int search(int top, int left, int size) {
 
+		if (top < 0 || left < 0 || top >= N || left >= N || size <= 0) return 0;
+		int sum = 0;
+		for (int i = top; i < top + size; ++i) {
+			if (i >= N) break;
+			for (int j = left; j < left + size; ++j) {
+				if (j >= N) break;
+				if (area[i][j] == 1) ++sum;
+			}
+		}
+
+		++searchCount;
+		return sum;
+	}
+	
 	static void run() {
 
 		int cmdCount;
