@@ -70,7 +70,7 @@ public class LinkedImproveCode {
 		}
 		
 		void print(){
-			node f = head;
+			node f = head.next;
 			while ( f != tail) {
 				System.out.print(f.c + " ");
 				f = f.next;
