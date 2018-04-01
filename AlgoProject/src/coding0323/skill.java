@@ -3,6 +3,8 @@ package coding0323;
 
 import static org.junit.Assert.*;
 
+import java.util.Stack;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -51,7 +53,9 @@ public class skill {
 		System.out.println();
 	}
 	
-	//t값에 대한 1bit 틀린거 구하기 (각 자리수마다 1을 더한다. 0001,0010,0100,1000 -> 1, 2, 4, 8 -> loop 4번 반복 x<<1  
+	/*
+	//t값에 대한 1bit 틀린거 구하기 (각 자리수마다 1을 더한다. 0001,0010,0100,1000 -> 1, 2, 4, 8 -> loop 4번 반복 x<<1
+	//하 이거 어렵게 구했네.
 	@org.junit.Test
 	public void test3() {
 		int a = 1 ;
@@ -59,9 +63,80 @@ public class skill {
 		for (int i = 0 ; i <= 7 ; i++) {
 			//System.out.print(a);
 			System.out.print(t + ",");
-			a = a<<1;			
 			t = t+a;
+			a = a<<1;
 		}
+	}
+	*/
+	
+	//아래 코드가 더 깔끔하다.
+	//t값에 대한 1bit 틀린거 구하기 (각 자리수마다 1을 더한다. 0001,0010,0100,1000 -> 1, 2, 4, 8 -> loop 4번 반복 x<<1
+	@org.junit.Test
+	public void test4() {
+		int a = 1 ;
+		int t = 30;
+		for (int i = 0 ; i <= 7 ; i++) {			
+			System.out.print(t+(a<<i) + ",");
+		}
+	}
+	
+	@org.junit.Test
+	public void test5() {
+		String val = "3*4+1";
+		
+		Stack<Object> numbers = new Stack<>();
+		Stack<Object> oper = new Stack<>();
+		
+		int len = val.length();
+		boolean isPriority = false; 
+		for (int i = 0 ; i < len ; i++) { 
+			char t = val.charAt(i);
+			
+			//oper
+			if ( t == '+') { 
+				oper.add(t);
+			}else if (t == '-'){
+				oper.add(t);
+			}else if (t == '*') {
+				oper.add(t);
+				isPriority = true;
+			}else if (t == '/') {
+				oper.add(t);
+				isPriority = true;
+			//number	
+			}else{
+				numbers.add(t);
+				//number 를 구했는데, priorty flag 가 스택2개를 빼서, 계산하고 다시 넣는다.  
+				if (isPriority){
+					int calcval = 0; 
+					char op = (char)oper.pop();
+					char n1 = (char)numbers.pop();
+					char n2 = (char)numbers.pop();
+					if (op =='*'){
+						calcval = (n1-48)*(n2-48);						
+					}else if (op =='/'){
+						calcval = (n1-48)/(n2-48);
+					}
+					numbers.add(Integer.toString(calcval));
+					
+					isPriority = false;
+				}
+			}
+		}
+		
+		len = numbers.size();
+		for (int i = 0; i < len; i++) {
+			System.out.print(numbers.get(i) + ",");
+			numbers.get(i);
+			oper.get(i);
+			
+		}
+		System.out.println();
+		len = oper.size();
+		for (int i = 0; i < len; i++) {
+			System.out.print(oper.get(i) +",");
+		}
+		
 	}
 	
 	
