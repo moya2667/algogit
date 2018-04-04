@@ -55,6 +55,7 @@ public class address {
 		total = 0;
 	}
 	
+	/*
 	@Test
 	public void test1() {
 		//t.insert("hdll".toCharArray(),0);
@@ -79,7 +80,7 @@ public class address {
 		}
 		System.out.println();
 	}
-	
+	*/
 	
 	@Test
 	public void test2() {
@@ -90,6 +91,7 @@ public class address {
 		//System.out.println(t.isfind("fell".toCharArray(),0));
 		//System.out.println(t.isfind("cccc".toCharArray(),0));
 		System.out.println(t.isfind("gpll".toCharArray(),0));
+		System.out.println(t.isfind("ipll".toCharArray(),0));
 		//System.out.println("bit diff = " + bitdiff);
 		
 		/*
@@ -99,15 +101,15 @@ public class address {
 		*/
 		
 		System.out.println(decisionStr);
-		
+		/*
 		st.size(); 
 		for ( int i = 0 ; i < st.size(); i++) { 
 			System.out.print((char)st.get(i));
 		}
 		System.out.println();
-	}
-	
-	//static int[] decisionbit = new int[9];
+		*/
+	}	
+
 	static int bitC = 0;
 	static int decisionbit = 999;
 	static String decisionStr = "";
@@ -145,6 +147,7 @@ public class address {
 				t[idx].c = chars[start];
 			}
 			
+			/*
 			int c = 0;  
 			for (int i = 0 ; i < 28 ; i++) { 
 				if ( t[i] != null ) {
@@ -152,6 +155,7 @@ public class address {
 					c++;
 				}
 			}
+			*/
 			
 			//System.out.println(c);
 			if (c > 1) isChilds = true;
@@ -161,17 +165,23 @@ public class address {
 		
 		public boolean isfind(char[] chars, int start) {
 			// 끝까지 같는데, 진짜 끝이라면 
-			if ( chars.length == start ){
+			if ( chars.length == start && isfinish == true){
 				if (decisionbit > bitdiff) {
 					decisionStr = "";
+					/*
 					for (int i = 0 ; i < st.size() ;i++) {
 						Object t= st.get(i);
 						decisionStr= decisionStr + st.get(i);
-					}					
+					}
+					*/			
+					decisionbit = bitdiff;
 					bitdiff=0;
 				}
 				return true;
+			}else if ( chars.length == start && isfinish == false){
+				return false;
 			}
+			
 			
 			int idx = chars[start];
 
@@ -184,54 +194,33 @@ public class address {
 					System.out.println("1bit 후보군은 : " + t[idx].c + " 입니다");
 					if ( i != 0 )
 						bitdiff++;
-					st.push(candi[i]);
+					//st.push(candi[i]);
 					boolean result = t[idx].isfind( chars , start+1);					
-					st.pop();
+					//st.pop();
 				}
 				//System.out.println("1bit 후보군 중 맞는 주소록이 없습니다");
 			}
-			return true;
-			
-			/*
-			if (t[idx] == null) {
-				System.out.println("못찾았습니다, 1bit 후보군 서치합니다");
-				//chars[start] 에 대한 후보군 가져오기 
-				char[] candi = getCandiBit(chars[start]);
-				for (int i = 0 ; i <=7 ; i++) { 
-					if (candi[i] == 0) continue;					
-					idx = candi[i];
-					if ( t[idx] != null){
-						System.out.println("1bit 후보군을 찾아 서치시작합니다.");
-						System.out.println("1bit 후보군은 : " + t[idx].c + " 입니다");
-						bitdiff++;
-						st.push(candi[i]);
-						boolean result = t[idx].isfind( chars , start+1);
-						//st.pop();
-						//return result;
-						if (!result) {
-							st.pop();
-							bitdiff--;
-							continue;
-						}else{
-							return result;
-						}
-					}
-					//System.out.println("1bit 후보군 중 맞는 주소록이 없습니다");
-					
-				}
-				
-				return false;
-			}
-			
-			else{
-				st.push(chars[start]);
-				boolean result = t[idx].isfind(chars, start+1);
-				//st.pop();
-				return result;
-			}
-			*/
+			return false;
 		}
 
+		
+		private char[] getCandiBit(char d) {
+			// TODO Auto-generated method stub
+			int a = 1 ;
+			char[] candi = new char[9];
+			int cnt = 1 ;
+			
+			candi[0] = d; 
+			for (int i = 0 ; i < 9 ; i++) {
+				int v = (d+(a<<i));
+				System.out.print(v +" ");
+				if ( v > 129 ) break;
+				candi[cnt++]= (char)v;
+			}
+			return candi;
+		}
+		
+		/*
 		private char[] getCandiBit(char d) {
 			// TODO Auto-generated method stub			
 			char[] b = new char[10];
@@ -252,8 +241,10 @@ public class address {
 				//System.out.println(b[i]);
 			}
 			
-			return b;		}		
-	}
+			return b;
+		}
+		*/	
 	
-	private Stack<Object> st = new Stack();
-}
+	
+	}
+	}

@@ -74,10 +74,37 @@ public class skill {
 	@org.junit.Test
 	public void test4() {
 		int a = 1 ;
-		int t = 30;
-		for (int i = 0 ; i <= 7 ; i++) {			
-			System.out.print(t+(a<<i) + ",");
+		char t = 'g';
+		for (int i = 0 ; i <= 7 ; i++) {	
+			char v = (char)(1^(a<<i));
+			System.out.print((int)v + ",");
 		}
+		System.out.println();
+		
+		getCandiBit('g');
+	}
+	
+	private char[] getCandiBit(char d) {
+		// TODO Auto-generated method stub			
+		char[] b = new char[10];
+		//b[0] = (char) (d+1);
+		int cnt = 0 ; 
+		for (int i = 0 ; i <= 8 ;i++) { 
+			//System.out.println( a + (i*2));
+			//if (d + (i*2) > 129) continue;
+			//b[cnt++]= (char) (d + (i*2));
+			if ( cnt == 1 ){
+				b[cnt++] = (char)(d+1);					
+			}
+			if (d + (i*2) > 129) continue;
+			b[cnt++]= (char) (d + (i*2));
+		}
+		
+		for (int i = 0 ; i <= 8 ;i++) {				 
+			System.out.println(b[i]);
+		}
+		
+		return b;
 	}
 	
 	@org.junit.Test
