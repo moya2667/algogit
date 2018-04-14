@@ -18,22 +18,25 @@ typedef struct {
 }FASHION;
 
 extern int calcSimilarity(const char code1[MAX_CODE], const char code2[MAX_CODE]);
+int call = 0;
 
 typedef struct
 {
 	char key[MAX_KEY + 1];
-	char value[MAX_KEY + 1];
-	int idx[5000];
-	int count = 0;
+	//key , Temp[count] = id 값 
+	int id[5000];
+	int count = 1;
 }Hash;
 
 struct HASHTABLE {
-	Hash tb[MAX_TABLE];
-	HASHTABLE() {		
+	Hash tb[MAX_TABLE] = { 0 };
+	HASHTABLE() {
+		/*
 		for (int i = 0; i < MAX_TABLE; i++) {
-			tb[i].key[0] = '\0';
-			tb[i].value[0] = '\0';
+		tb[i].key[0] = '\0';
+		tb[i].value[0] = '\0';
 		}
+		*/
 	};
 
 	~HASHTABLE() {
@@ -52,7 +55,7 @@ struct HASHTABLE {
 
 
 
-	bool find(const char *key, Hash *data)
+	bool find(const char *key, Hash* data)
 	{
 
 		unsigned long h = hash(key);
@@ -64,15 +67,7 @@ struct HASHTABLE {
 
 			if (strcmp(tb[h].key, key) == 0)
 			{
-				//data = &tb[h];				
-				
-				strcpy(data->key , tb[h].key);
-				strcpy(data->value, tb[h].value);
-				data->count = tb[h].count;
-				for (int i = 0; i <= tb[h].count; i++) {
-					data->idx[i] = tb[h].idx[i];
-				}
-				
+				*data = tb[h];	//약간 어색한 코드.			
 				return 1;
 			}
 
@@ -83,63 +78,159 @@ struct HASHTABLE {
 
 
 
-	int add(const char *key, char *data, int idx)
+	int add(const char *key, int fashionID)
 	{
-		Hash* test = new Hash();		
+		Hash* test = new Hash();
 		unsigned long h = hash(key);
-		int step = 1;
 		int i = 0;
 
 		while (tb[h].key[0] != 0)
 		{
 			if (strcmp(tb[h].key, key) == 0)
 			{
-				tb[h].count = tb[h].count+1;
-				tb[h].idx[tb[h].count] = idx;
-				printf("same\n");
+				tb[h].id[tb[h].count] = fashionID;
+				tb[h].count++;
 				return 0;
 			}
 			h = (h + 1) % MAX_TABLE;
-
 		}
 
+		//신규 fashion 이라면
 		strcpy(tb[h].key, key);
-		strcpy(tb[h].value, data);
+		tb[h].id[tb[h].count] = fashionID;
+		tb[h].count++;
 
+		/* 왜 썼지.
 		if (tb[h].count >= 1) {
-			tb[h].count = tb[h].count + 1;
+		tb[h].count = tb[h].count + 1;
 		}
-
-		tb[h].idx[tb[h].count] = idx;
+		*/
 		return 1;
 	}
 };
 
-HASHTABLE* hat = new HASHTABLE();
-HASHTABLE* top;
-HASHTABLE* pants;
+HASHTABLE hat;
+HASHTABLE accessory;
+HASHTABLE top;
+HASHTABLE pants;
+HASHTABLE shoes;
+int fashionID = 1;
+int max = 0;
+
+FASHION fa[5500];
 
 void init() {
+	fashionID = 1;
+	max = 0;
+	call = 0;
 }
-
-
-int start = 0;
 
 void addCatalog(FASHION fashion) {
-	Hash* test = new Hash();	
-	printf("added hat key = %s\n", fashion.hat);
-	hat->add(fashion.hat, "", start++);
+	strcpy(fa[fashionID].accessory, fashion.accessory);
+	strcpy(fa[fashionID].hat, fashion.hat);
+	strcpy(fa[fashionID].pants, fashion.pants);
+	strcpy(fa[fashionID].shoes, fashion.shoes);
+	strcpy(fa[fashionID].top, fashion.top);
 
-	if (hat->find(fashion.hat, test)) {
-		printf("key = %s %d\n", test->key , test->count);
-		for (int i = 0; i <= test->count; i++) {
-			printf("idx = %d\n", test->idx[i]);
-		}
+	//fashion Idx -> Fashion ID
+	hat.add(fashion.hat, fashionID);
+	accessory.add(fashion.accessory, fashionID);
+	pants.add(fashion.pants, fashionID);
+	shoes.add(fashion.shoes, fashionID);
+	top.add(fashion.top, fashionID);
+	/*
+	if (hat.find(fashion.hat, &test)) {
+	printf("key = %s %d\n", test.key , test.count);
+	for (int i = 0; i <= test.count; i++) {
+	printf("idx = %d\n", test.idx[i]);
 	}
+	}
+	*/
+	fashionID++;
 }
 
+int* addCandidate(Hash* fa, int* candidate, int start) {
+	int end = start + fa->count;
+
+	for (int i = 1; i < end; i++) {
+		candidate[start++] = fa->id[i];
+		//*candidate = *candidate + 1;
+	}
+
+	return candidate;
+}
 
 int newFashion(FASHION fashion) {
-	return 0;
+	/*Debugging 코드
+	max = 0;
+	for (int i = 1; i < 5000; i++) {
+	int a = calcSimilarity(fa[i].accessory, fashion.accessory);
+	int b = calcSimilarity(fa[i].hat, fashion.hat);
+	int c = calcSimilarity(fa[i].pants, fashion.pants);
+	int d = calcSimilarity(fa[i].shoes, fashion.shoes);
+	int e = calcSimilarity(fa[i].top, fashion.top);
+
+	if (a == 99 | b == 99 | c == 99 | d == 99 | e == 99) continue;
+
+	int total = a + b + c + d + e;
+
+	if (max < total) {
+	max = total;
+	}
+	//candidate[i];
+	}
+	*/
+
+	call++;
+
+	Hash* fashionPtr = new Hash();
+	int candidate[500] = { 0 };
+	max = 0;
+	hat.find(fashion.hat, fashionPtr);
+	int count = fashionPtr->count;
+	addCandidate(fashionPtr, candidate, 1);
+
+	accessory.find(fashion.accessory, fashionPtr);
+	addCandidate(fashionPtr, candidate, count);
+	//하 코드 진짜..
+	count = (count - 1) + (fashionPtr->count - 1);
+
+	pants.find(fashion.pants, fashionPtr);
+	addCandidate(fashionPtr, candidate, count);
+	count = (count - 1) + (fashionPtr->count - 1);
+
+	shoes.find(fashion.shoes, fashionPtr);
+	addCandidate(fashionPtr, candidate, count);
+	count = (count - 1) + (fashionPtr->count - 1);
+
+	top.find(fashion.top, fashionPtr);
+	addCandidate(fashionPtr, candidate, count);
+	count = (count - 1) + (fashionPtr->count - 1);
+
+	//candidate
+	for (int i = 1; i <= count; i++) {
+		int idx = candidate[i];
+		int a = calcSimilarity(fa[idx].accessory, fashion.accessory);
+		int b = calcSimilarity(fa[idx].hat, fashion.hat);
+		int c = calcSimilarity(fa[idx].pants, fashion.pants);
+		int d = calcSimilarity(fa[idx].shoes, fashion.shoes);
+		int e = calcSimilarity(fa[idx].top, fashion.top);
+
+		if (a == 99 | b == 99 | c == 99 | d == 99 | e == 99) continue;
+
+		int total = a + b + c + d + e;
+
+
+		if (max < total) {
+			max = total;
+		}
+		//candidate[i]; 		
+	}
+
+
+	//나눈 값을 하나로 모은다.
+	return max;
 }
+
+
 
