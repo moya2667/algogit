@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <memory.h>
+#include <stdlib.h>
 
 #define MAX_CODE 10
 #define MAX_KEY 10
@@ -18,7 +19,6 @@ typedef struct {
 }FASHION;
 
 extern int calcSimilarity(const char code1[MAX_CODE], const char code2[MAX_CODE]);
-int call = 0;
 
 typedef struct
 {
@@ -122,7 +122,7 @@ FASHION fa[5500];
 void init() {
 	fashionID = 1;
 	max = 0;
-	call = 0;
+
 }
 
 void addCatalog(FASHION fashion) {
@@ -138,14 +138,6 @@ void addCatalog(FASHION fashion) {
 	pants.add(fashion.pants, fashionID);
 	shoes.add(fashion.shoes, fashionID);
 	top.add(fashion.top, fashionID);
-	/*
-	if (hat.find(fashion.hat, &test)) {
-	printf("key = %s %d\n", test.key , test.count);
-	for (int i = 0; i <= test.count; i++) {
-	printf("idx = %d\n", test.idx[i]);
-	}
-	}
-	*/
 	fashionID++;
 }
 
@@ -160,28 +152,24 @@ int* addCandidate(Hash* fa, int* candidate, int start) {
 	return candidate;
 }
 
+
+int* getCandidate(int* candidate, int c) {
+
+	int can[500];	//최적화 하고 싶어도 못하겠네
+
+	for (int i = 1; i <= c; i++) {
+		int idx = candidate[i];
+		printf("%d", can[idx]);
+		if (can[idx] == 0) {
+			can[idx] = 1;
+		}
+	}
+	return can;
+}
+
+int MemoSimiar[5][501][501];
+
 int newFashion(FASHION fashion) {
-	/*Debugging 코드
-	max = 0;
-	for (int i = 1; i < 5000; i++) {
-	int a = calcSimilarity(fa[i].accessory, fashion.accessory);
-	int b = calcSimilarity(fa[i].hat, fashion.hat);
-	int c = calcSimilarity(fa[i].pants, fashion.pants);
-	int d = calcSimilarity(fa[i].shoes, fashion.shoes);
-	int e = calcSimilarity(fa[i].top, fashion.top);
-
-	if (a == 99 | b == 99 | c == 99 | d == 99 | e == 99) continue;
-
-	int total = a + b + c + d + e;
-
-	if (max < total) {
-	max = total;
-	}
-	//candidate[i];
-	}
-	*/
-
-	call++;
 
 	Hash* fashionPtr = new Hash();
 	int candidate[500] = { 0 };
@@ -207,9 +195,30 @@ int newFashion(FASHION fashion) {
 	addCandidate(fashionPtr, candidate, count);
 	count = (count - 1) + (fashionPtr->count - 1);
 
+	int* data = getCandidate(candidate, count);
+
+	HASHTABLE memo;
+
 	//candidate
 	for (int i = 1; i <= count; i++) {
 		int idx = candidate[i];
+
+		Hash* t = new Hash();
+		if (memo.find(fa[idx].accessory, t)) {
+			int y = t->count;
+			int x = -1;
+			if (memo.find(fashion.accessory, t)) {
+				x = t->count;
+			}
+			if (MemoSimiar[1][y][x] != 0) {
+				value = MemoSimiar[1][y][x];
+			}
+		}
+		else {
+			memo.add(fa[idx].accessory, t);
+		}
+
+
 		int a = calcSimilarity(fa[idx].accessory, fashion.accessory);
 		int b = calcSimilarity(fa[idx].hat, fashion.hat);
 		int c = calcSimilarity(fa[idx].pants, fashion.pants);
@@ -219,7 +228,6 @@ int newFashion(FASHION fashion) {
 		if (a == 99 | b == 99 | c == 99 | d == 99 | e == 99) continue;
 
 		int total = a + b + c + d + e;
-
 
 		if (max < total) {
 			max = total;
@@ -234,3 +242,22 @@ int newFashion(FASHION fashion) {
 
 
 
+/*Debugging 코드
+max = 0;
+for (int i = 1; i < 5000; i++) {
+int a = calcSimilarity(fa[i].accessory, fashion.accessory);
+int b = calcSimilarity(fa[i].hat, fashion.hat);
+int c = calcSimilarity(fa[i].pants, fashion.pants);
+int d = calcSimilarity(fa[i].shoes, fashion.shoes);
+int e = calcSimilarity(fa[i].top, fashion.top);
+
+if (a == 99 | b == 99 | c == 99 | d == 99 | e == 99) continue;
+
+int total = a + b + c + d + e;
+
+if (max < total) {
+max = total;
+}
+//candidate[i];
+}
+*/
