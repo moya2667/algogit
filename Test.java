@@ -16,13 +16,14 @@ public class Test {
 	}
 	
 	@org.junit.Test
-	public void hash() {
+	public void hash() {		
 		HashMap<char[] , Integer> t = new HashMap();
 		char[] a1 = "a".toCharArray();
 		t.put(a1, 1);
 		t.put("b".toCharArray(), 2);
 		t.put("c".toCharArray(), 3);		
 		char[] e = "a".toCharArray();
+		//hash key of char[] was not supported
 		System.out.println(t.get(e));		
 	}
 	
@@ -102,7 +103,7 @@ public class Test {
 				System.out.println("not found : " + d);
 				return false;
 			}
-			//ÇöÀç ºÎ¸ğ³ëµåÀÇ list ¸¦ °¡Á®¿Í¼­ ÇØ´ç ³ëµå ¿¬°áÀ» ²÷¾î¹ö¸°´Ù 
+			//í˜„ì¬ ë¶€ëª¨ë…¸ë“œì˜ list ë¥¼ ê°€ì ¸ì™€ì„œ í•´ë‹¹ ë…¸ë“œ ì—°ê²°ì„ ëŠì–´ë²„ë¦°ë‹¤ 
 			n.parent.clist.delete(n);
 			
 			return false;
@@ -141,7 +142,7 @@ public class Test {
 		}
 		void delete(treenode n){			 
 			
-			//ÇÏ³ª¸¸ Á¸Àç 
+			//í•˜ë‚˜ë§Œ ì¡´ì¬ 
 			if (n == head && n==tail) { 
 				head = null;
 				tail = null;
@@ -161,7 +162,7 @@ public class Test {
 				return;								
 			}
 			
-			//Áß°£ÀÏ°æ¿ì
+			//ì¤‘ê°„ì¼ê²½ìš°
 			treenode ne = n.next;
 			treenode pr = n.prev;
 			
