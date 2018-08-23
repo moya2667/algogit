@@ -16,14 +16,13 @@ public class Test {
 	}
 	
 	@org.junit.Test
-	public void hash() {		
+	public void hash() {
 		HashMap<char[] , Integer> t = new HashMap();
 		char[] a1 = "a".toCharArray();
 		t.put(a1, 1);
 		t.put("b".toCharArray(), 2);
 		t.put("c".toCharArray(), 3);		
 		char[] e = "a".toCharArray();
-		//hash key of char[] was not supported
 		System.out.println(t.get(e));		
 	}
 	
@@ -50,22 +49,33 @@ public class Test {
 		treenode one = tr.add(root , "1");
 		treenode two = tr.add(root , "2");
 		treenode three = tr.add(root , "3");
+		treenode four= tr.add(root , "4");
 		
 		//tr.delete("1".toCharArray()); 
 		treenode two_child = tr.add(two, "21");
 		
 		tr.print(root, 0);
+		System.out.println("--------");
 		
-		tr.delete("2");		
+		tr.delete("1");		
 		tr.print(root, 0);		
-		
+		System.out.println("--------");
 		
 		tr.delete("3");
 		tr.print(root, 0);
+		System.out.println("--------");
 		
-		tr.delete("1");
-		tr.print(root, 0);
+		tr.delete("2");
+		tr.print(root, 0);		
+		System.out.println("--------");
 		
+		tr.delete("4");
+		tr.print(root, 0);		
+		System.out.println("--------");
+		
+		tr.add(root,"5");
+		tr.print(root, 0);		
+		System.out.println("--------");
 		
 	}
 	
@@ -109,12 +119,9 @@ public class Test {
 			return false;
 			
 		}
-		public treenode add(treenode t, String data) {
-			
-			treenode n = new treenode(data);
-			
-			n.parent = t;
-			
+		public treenode add(treenode t, String data) {			
+			treenode n = new treenode(data);			
+			n.parent = t;			
 			
 			return t.clist.add(n);
 		}
@@ -140,8 +147,7 @@ public class Test {
 			
 			return n;
 		}
-		void delete(treenode n){			 
-			
+		void delete(treenode n){
 			//하나만 존재 
 			if (n == head && n==tail) { 
 				head = null;
@@ -150,25 +156,21 @@ public class Test {
 			}
 			
 			if (n == head) {				
-				head = n.next ;
-				n.next.prev = null; 
-				return;
+				head = head.next ;
+				head.prev = null;
+			}			
+			else if (n == tail) {
+				tail = tail.prev ; //tail =  n.prev
+				tail.next = null;				
+			}else{			
+				//중간일경우
+				treenode ne = n.next;
+				treenode pr = n.prev;
+				
+				pr.next = ne;
+				ne.prev = pr;
+				n = null;
 			}
-			
-			if (n == tail) {
-				treenode p = n.prev;
-				p.next = null ; 
-				tail = p ;
-				return;								
-			}
-			
-			//중간일경우
-			treenode ne = n.next;
-			treenode pr = n.prev;
-			
-			pr.next = ne;
-			ne.prev = pr;
-			n = null;
 			
 		}		
 	}	
@@ -181,7 +183,6 @@ public class Test {
 		ll clist = null;		
 		public treenode(){};
 		public treenode(String charArray) {
-			// TODO Auto-generated constructor stub
 			this.charA=charArray;
 			clist = new ll();			
 		} 
