@@ -41,16 +41,20 @@ public class HashTest {
 	@Test
 	public void test() {
 		
-		DB db = new DB();
-		
-		for (int i = 0 ; i < 20000; i ++) {
-			
+		DB db = new DB();		
+		for (int i = 0 ; i < 30000; i ++) {			
 			if ( !db.add(String.valueOf(i).toCharArray(), i )){
 				System.out.println("fail to add = " +  i);
 			}
+			
+			System.out.print("i = " + i + " : ");
 		}
 		
-		for (int i = 0 ; i < 20000; i ++) {
+		System.out.println();
+		System.out.println("collision= " +db.collision);
+		
+		/*
+		for (int i = 0 ; i < 10000; i ++) {
 			nodeinfo in = (nodeinfo)db.find(String.valueOf(i).toCharArray());
 			if (in == null){
 				System.out.println("nod found key");
@@ -58,7 +62,7 @@ public class HashTest {
 			
 			System.out.println(String.valueOf(in.idx));
 		}
-		
+		*/
 		
 		/*
 		db.add("key".toCharArray(), "data".toCharArray()); 
@@ -77,8 +81,8 @@ public class HashTest {
 	}
 	
 	class DB {
-		
-		Hashtable hs = new Hashtable(20000);
+		public int collision = 0;
+		Hashtable hs = new Hashtable(50000);
 
 		int addcnt = 0 ; 
 		public boolean add(char[] charArray, int idx) {
@@ -126,6 +130,7 @@ public class HashTest {
 			int capacity;
 			Hash tb[];
 			
+			
 			public Hashtable(int capacity){
 				this.capacity = capacity;
 				tb = new Hash[capacity];
@@ -136,12 +141,16 @@ public class HashTest {
 			
 			private int hash(char[] str)
 			{
+				//int hash = 1;
 				int hash = 5381;
+				//int hash = 8623;
 				
 				for (int i = 0; i < str.length; i++)
 				{
 					int c = (int)str[i];
-					hash = ((hash << 5) + hash) + c;
+					//hash = ((hash << 5) + hash) + c;
+					//이렇게 쓰니까 collision 이 기존 코드보다 훨씬 적다.
+					hash = (hash << 5) + c * ((i + 1) * (i + 1) + (i + 1) + 41);
 				}
 				if (hash < 0) hash *= -1;
 				return hash % capacity;
@@ -181,7 +190,7 @@ public class HashTest {
 				int cnt = capacity;				
 				while(tb[h].key != null && (--cnt) != 0)
 				{
-					if (tb[h].key.equals(key)){
+					if(isCharSame(tb[h].key, key)){					
 						tb[h]= null;
 						return true;
 					}
@@ -194,13 +203,17 @@ public class HashTest {
 			
 			boolean add(char[] key, nodeinfo data)
 			{				
-				int h = hash(key);				
+				int h = hash(key);
+				System.out.println(h);
+				
 				while(tb[h].key != null)
 				{
 					if (tb[h].key.equals(key)){
 						return false;
 					}
+					collision++;
 					h = (h + 1) % capacity;
+					
 				}				
 				
 				tb[h].key = key;
