@@ -47,40 +47,19 @@ unsigned long getHash(unsigned char* data)
 	return hash % MAX_TABLE;
 }
 
-int find(unsigned char *key, char *data)
-{
-	unsigned long h = getHash(key);
-	int cnt = MAX_TABLE;
-	/*
-	while (tb[h].key[0] != 0 && cnt--)
-	{
-		if (strcmp(tb[h].key, key) == 0)
-		{
-			strcpy(data, tb[h].data);
-			return 1;
-		}
-		h = (h + 1) % MAX_TABLE;
-	}
-	*/
-	return 0;
+int getMemIdx(int keyIdx) {
+	return keyIdx * 12;
 }
+
 bool canWrite(long idx) {
 	unsigned char temp[12];
-	memread(temp, idx, 12);
+	memread(temp, getMemIdx(idx), 1);
 	if (temp[0] != '\0') {
 		return false;
 	}
 	return true;
 }
 
-bool canRead(long idx) {
-	unsigned char temp[12];
-	memread(temp, idx, 12);
-	if (temp[0] != '\0') {
-		return true;
-	}
-	return false;
-}
 
 int mystrlen(unsigned const char *str)
 {
@@ -114,12 +93,14 @@ void put(unsigned char key_in[], unsigned char value_in[])
 		if (!canWrite(keyIDX)) {
 			keyIDX = keyIDX + 1;
 		}
-		memwrite(key_in, keyIDX*12, 12);		
-		memwrite(value_in, START_VALUEIDX + keyIDX*12, 12);
-		printf("put command key = %s %d, value=%s %d\n", key_in, keyIDX, value_in, START_VALUEIDX + keyIDX*12);
+		memwrite(key_in, getMemIdx(keyIDX), 12);		
+		memwrite(value_in, START_VALUEIDX + getMemIdx(keyIDX), 12);
+		printf("put command key = %s %d, value=%s %d\n", key_in, keyIDX, value_in, START_VALUEIDX + getMemIdx(keyIDX));
 		break;
 	}
 }
+
+
 
 // key 값으로 주어진 문자열을 통해 database에서 삭제.
 void del(unsigned char key_in[])
@@ -131,7 +112,7 @@ void del(unsigned char key_in[])
 
 		while (loopC >= 0) {
 			unsigned char read_key[12];
-			memread(read_key, keyIDX*12, 12);
+			memread(read_key, getMemIdx(keyIDX), 12);
 			//같으면 
 			if (mystrcmp(key_in, read_key)) {				
 				break;
@@ -141,10 +122,7 @@ void del(unsigned char key_in[])
 		}
 
 		//메모리 삭제 '\0' 으로 
-		unsigned char data[12];
-		for (int i = 0; i < 12; i++) {
-			data[i] = '\0';
-		}
+		unsigned char data[12] = { '\0', };		
 
 		/*
 		unsigned char testkey[12];
@@ -153,10 +131,10 @@ void del(unsigned char key_in[])
 		memread(testvalue, START_VALUEIDX + keyIDX, 12);
 		printf("command key = %s , data  = %s \n", testkey, testvalue );
 		*/
-		memwrite(data, keyIDX*12, 12);
-		memwrite(data, START_VALUEIDX + keyIDX*12, 12);	
+		memwrite(data, getMemIdx(keyIDX), 12);
+		memwrite(data, START_VALUEIDX + getMemIdx(keyIDX), 12);	
 
-		printf("del command key = %s %d, data  = %s %d\n", key_in, keyIDX*12, data, START_VALUEIDX + keyIDX*12);		
+		printf("del command key = %s %d, data  = %s %d\n", key_in, getMemIdx(keyIDX), data, START_VALUEIDX + getMemIdx(keyIDX));		
 		break;
 	}
 }
@@ -171,7 +149,7 @@ void get(unsigned char key_in[], unsigned char value_out[])
 
 		while (loopC >= 0) {
 			unsigned char read_key[12];
-			memread(read_key, keyIDX*12, 12);
+			memread(read_key, getMemIdx(keyIDX), 12);
 			//같으면 
 			if (mystrcmp(key_in, read_key)) {				
 				break;
@@ -182,9 +160,9 @@ void get(unsigned char key_in[], unsigned char value_out[])
 
 		unsigned char data[12];
 		memread(data, keyIDX * 12, 12);
-		memread(data, START_VALUEIDX + keyIDX*12, 12);
+		memread(data, START_VALUEIDX + getMemIdx(keyIDX), 12);
 
-		printf("get command key = %s %d, data  = %s %d\n", key_in ,keyIDX*12 , data , START_VALUEIDX + keyIDX*12);
+		printf("get command key = %s %d, data  = %s %d\n", key_in ,getMemIdx(keyIDX) , data , START_VALUEIDX + getMemIdx(keyIDX));
 		break;
 	}	
 	
@@ -202,11 +180,7 @@ void get_key(unsigned char value_in[], unsigned char key_out[])
 	for (int i = 0; i< 2400 ; i++) {
 		
 		unsigned char read_key[12];
-		unsigned char read_value[12];
-		if (i == 1120) {			
-			memread(read_key, cnt, 12);
-			//printf("key=%s", read_key);
-		}
+		unsigned char read_value[12];		
 		
 		memread(read_value, START_VALUEIDX + cnt  , 12);
 		
