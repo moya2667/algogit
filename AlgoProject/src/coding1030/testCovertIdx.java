@@ -1,12 +1,5 @@
 package coding1030;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Scanner;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +20,17 @@ public class testCovertIdx {
 		String sD =new String(d);
 		System.out.println(sD);
 	}
+	
+    @Test
+    public void testShort2CharArray() { 
+        //seperate char[2] from short value and roll back 
+        short d = 32767; //short 2byte
+        char[] t = new char[2];        
+        t[0] = (char) (d>>8 & 0xff); //무슨암호도아니고 이런스킬까지 알아야하나
+        t[1] = (char) (d & 0xff);        
+        short reverse = (short)(t[0] << 8 | t[1]);
+        System.out.println(reverse);
+    }	
 	
 	@Test
 	public void testIdxToArray() { 
