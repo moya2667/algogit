@@ -27,6 +27,26 @@ public class datastrcutrue {
 		while(e.hasNext()){
 			System.out.println(e.next());
 		}
+		
+		System.out.println(map.get('1'));
+	}
+	
+	@Test
+	public void t1() { 
+		HashMap map = new HashMap(); 
+		map.put("12".toCharArray(), "b");
+		map.put("22", "c");
+		map.put("33", "d");
+		
+		Iterator e = map.keySet().iterator();
+		
+		while(e.hasNext()) { 
+			//char[] key = (char[])e.next();
+			//System.out.println(key); 
+		}
+		
+		System.out.println(map.get("22"));
+		
 	}
 	
 	@Test
@@ -63,13 +83,41 @@ public class datastrcutrue {
 	@Test
 	public void testQueueList() {
 		Queue t = new LinkedList();
-		t.add(3);
-		t.add(4);
-		t.add(5); 
+		t.add("3a");
+		t.add("4a");
+		t.add("5a"); 
 		
 		while(!t.isEmpty()){ 
 			System.out.println(t.poll());
 		}
+	}
+	
+	@Test
+	public void testQueue(){
+		Queue t = new LinkedList();
+		t.add("1");
+		t.add("2");
+		
+		System.out.println(t.poll());
+		System.out.println(t.poll()); 
+	}
+	
+	@Test
+	public void testHash(){
+		HashMap t = new HashMap();
+		char[] a = "1".toCharArray();
+		t.put(a, "TTT");
+		t.put("2".toCharArray(), "AAA");
+		
+		Iterator rator = t.keySet().iterator();
+		while( rator.hasNext()){
+			Object key = rator.next();			
+			System.out.println(t.get(key));
+		}
+		
+		char[] b = "1".toCharArray();
+		System.out.println(t.get(a));
+		 
 	}
 	
 	@Test
