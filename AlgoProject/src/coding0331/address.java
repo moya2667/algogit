@@ -1,8 +1,8 @@
 package coding0331;
 
-import static org.junit.Assert.*;
-
-import java.util.Stack;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,22 +23,18 @@ public class address {
 	static int bitdiff = 0;
 
 	@Test
-	public void test() {
-		t.insert("hell".toCharArray(), 0);
-		t.insert("hello".toCharArray(), 0);
-		t.insert("heaven".toCharArray(), 0);
-
-		t.isfind("hello".toCharArray(), 0);
-		System.out.println(total);
-		total = 0;
-
-		t.isfind("hell".toCharArray(), 0);
-		System.out.println(total);
-		total = 0;
-
-		t.isfind("heaven".toCharArray(), 0);
-		System.out.println(total);
-		total = 0;
+	public void test() throws FileNotFoundException {
+        FileInputStream ip = new FileInputStream("src\\coding0331\\sample.txt");     
+        Scanner sc = new Scanner(ip);
+        int c = sc.nextInt();
+        
+        for (int i=0 ; i< c ;i++) {
+            char[] data = sc.next().toCharArray();
+            System.out.println(data);
+            t.insert(data, 0);
+        }
+        
+        System.out.println(t.isfind("d.CL)^".toCharArray(), 0));
 	}
 
 	/*
@@ -76,12 +72,12 @@ public class address {
 	@Test
 	public void test2() {
 		// t.insert("fell".toCharArray(),0);
-		t.insert("gtnh".toCharArray(), 0);
+		t.insert("owzH+t".toCharArray(), 0);
 		t.insert("ipll".toCharArray(), 0);
 
 		// System.out.println(t.isfind("fell".toCharArray(),0));
 		// System.out.println(t.isfind("cccc".toCharArray(),0));
-		System.out.println(t.isfind("fpll".toCharArray(), 0));
+		System.out.println(t.isfind("owzH+t".toCharArray(), 0));
 		System.out.println(t.isfind("ipll".toCharArray(), 0));
 		// System.out.println("bit diff = " + bitdiff);
 
@@ -93,6 +89,7 @@ public class address {
 		/*
 		 * st.size(); for ( int i = 0 ; i < st.size(); i++) {
 		 * System.out.print((char)st.get(i)); } System.out.println();
+		 * d.CL)^
 		 */
 	}
 
@@ -156,7 +153,7 @@ public class address {
 				return false;
 			}
 
-			// int idx = chars[start];
+			int originIdx = chars[start];
 
 			char[] candi = getCandiBitAgain(chars[start]);
 			for (int i = 0; i < 9; i++) {
@@ -183,7 +180,7 @@ public class address {
 			}
 
 			for (int i = 0; i < bit.length; i++) {
-				System.out.print(candi[i] + ":" + (int) candi[i] + " . ");
+				System.out.print(candi[i] + ":" + (int) candi[i] +" ");
 			}
 			System.out.println();
 			return candi;
