@@ -1,0 +1,14 @@
+13
+1 1 2 test
+1 1 3 ppp
+1 2 2 test
+1 2 3 xxxx
+1 4 3 xxxx
+1 1 5 bbbb
+4 2 2
+4 1 3
+2 2 test
+4 2 1
+2 1 ppp
+4 1 2
+3 2 xxxx yyyy   
