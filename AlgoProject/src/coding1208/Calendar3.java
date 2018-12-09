@@ -7,6 +7,16 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 import org.junit.Test;
+/**
+ * <PRE>
+ * 1. 자료 구조 정의 및 문제 이해에 시간이 오래걸림
+ * 3. 자료 구조만 구현하다보니 , 정확히 이해가 되지 않음 (고민거리들이 잔뜩생김)
+ * 4. USER CODE의 함수 호출 흐름으로 빠르게 넘어갔어야. 
+ * 5. HASH CHAINING에 대해 응용 하..
+ * 6. 심지어 핵심 알고리즘은 손도 못대고 나온거 
+ * 7. 하...집에와서 다시 풀어봤지만, 2시간 걸렸음..음
+ * 8. Controller 부분(UID / GROUP LIST)을 어디에다가 넣어야 하는지 ..먼가 머리속에 정리 및 이해가 안되어있었다.
+ */
 
 public class Calendar3 {
 	/*
@@ -26,7 +36,7 @@ public class Calendar3 {
 	int CHANGE = 3;	
 	int GETCOUNT = 4; 
 	
-	static UID[] uidList = new UID[1000];
+	static UID[] uIDList = new UID[1000];
 	static GROUP[] groupList = new GROUP[100];
 	
 	@Test
@@ -41,23 +51,26 @@ public class Calendar3 {
 				int uid = sc.nextInt();
 				int groupid = sc.nextInt();
 				char[] task = sc.next().toCharArray();
-				System.out.println(uid + " : " + groupid + " : " + new String(task));				
-				if ( uidList[uid] == null ){
-					uidList[uid] = new UID();
+				System.out.println(uid + " : " + groupid + " : " + new String(task));
+				
+				if ( uIDList[uid] == null ){
+					uIDList[uid] = new UID();
 				}				
-				uidList[uid].addEvent(uid, groupid, task);
+				uIDList[uid].addTASK(uid, groupid, task);
 				
 				//GROUP 관리 따로 //이건 전역
 				if (groupList[groupid] == null ) {
 					groupList[groupid] = new GROUP(groupid);
 				}
-				groupList[groupid].addGroup(task,uidList[uid].getTask(task));				
+				
+				UIDTask uIDTask= uIDList[uid].getTask(task);
+				groupList[groupid].addGroup(task,uIDTask);
 				groupList[groupid].print();
 				
 			}else if(EVENT == GETCOUNT){
 				int uid = sc.nextInt();
 				int oriResult = sc.nextInt();
-				int returnResult = uidList[uid].getTaskCount();
+				int returnResult = uIDList[uid].getTaskCount();
 				if (oriResult == returnResult) {
 					System.out.println(uid + " ID에 속한 TASK갯수 " + oriResult + " 맞습니다");
 				}else{
@@ -67,18 +80,26 @@ public class Calendar3 {
 			}else if(EVENT == DELETE) {
 				int uid = sc.nextInt();
 				char[] oriResult = sc.next().toCharArray();
-				System.out.println("DELETE 를 수행합니다");
-				uidList[uid].deleteTaskName(oriResult);		
+				System.out.println(uid + "번 id의 "+ new String(oriResult) + "를 DELETE 수행합니다");				
+				
+				int groupID = uIDList[uid].getTask(oriResult).gID;
+				uIDList[uid].print();
+				uIDList[uid].deleteTask(oriResult);
+				uIDList[uid].print();
+				
+				groupList[groupID].print();				
+				groupList[groupID].deleteTask(oriResult);				
+				groupList[groupID].print();
 				
 			}else if(EVENT == CHANGE) {
 				int uid = sc.nextInt();
 				char[] oriResult = sc.next().toCharArray();
 				char[] changedResult = sc.next().toCharArray();		
 				//TASK 를 가져오고 
-				UIDTask oriTask = uidList[uid].getTask(oriResult);
+				UIDTask oriTask = uIDList[uid].getTask(oriResult);
 				int gID = oriTask.gID;
-				uidList[uid].changeTask(oriResult, changedResult);
-				uidList[uid].print();
+				uIDList[uid].changeTask(oriResult, changedResult);
+				uIDList[uid].print();
 				
 				groupList[gID].print();
 				groupList[gID].changeTask(oriResult, changedResult);
@@ -90,23 +111,24 @@ public class Calendar3 {
 	class UID {
 		HashMap<String, UIDTask> taskMap= new HashMap();
 		int cnt = 0 ;
+		int uID = 99999999 ;
 		
 		UID() {}
 		
 		public void print() {
+			System.out.println("UID 정보");
 			Iterator t = taskMap.keySet().iterator();			
 			while(t.hasNext()) {
 				String key = (String)t.next();
 				UIDTask uIDTask = taskMap.get(key);
-				System.out.print("uID:" + uIDTask.uID + " gID:" + uIDTask.gID + " TASK:" + new String(uIDTask.task));
-			}
-			System.out.println();
+				System.out.println("uID:" + uIDTask.uID + " gID:" + uIDTask.gID + " TASK:" + new String(uIDTask.task));
+			}			
 		}
 
-		public void addEvent(int uID , int gID , char[] taskName) {
+		public void addTASK(int uID , int gID , char[] taskName) {
 			//UID의 TASK 따로 
-			UIDTask t = new UIDTask(uID,gID,taskName);
-			t.setMaster(true); //이거 어떻게 하지?
+			this.uID = uID;
+			UIDTask t = new UIDTask(uID,gID,taskName);			
 			taskMap.put(new String(taskName) , t);
 			cnt++;
 		}
@@ -119,15 +141,13 @@ public class Calendar3 {
 			return taskMap.get(new String(taskName));
 		}
 		
-		public void deleteTaskName(char[] taskName) {
+		public void deleteTask(char[] taskName) {
 			UIDTask t = taskMap.get(new String(taskName));
 			if (t == null) { 
 				System.out.println("delete TASK 존재하지않습니다");
 				return;
 			}
 			
-			int groupID = t.gID;
-			groupList[groupID].deleteTask(taskName);
 			taskMap.remove(new String(taskName));			
 			cnt--;
 		}
@@ -193,6 +213,7 @@ public class Calendar3 {
 				//Group Hashing 에 대한 Linked 생성 
 				LinkedTask ll = new LinkedTask();
 				ll.add(t);
+				t.setMaster(true);
 				groupMap.put(new String(taskName), ll);
 				
 				//System.out.println(groupMap.get(new String(taskName)).head.task);
@@ -252,7 +273,7 @@ public class Calendar3 {
 				LinkedTask llTask = groupMap.get(key);
 				UIDTask head = llTask.head;
 				while(head !=null){
-					System.out.println(head.uID + "." + new String(head.task));
+					System.out.println(head.uID + "." + new String(head.task) +" : MASTER: " +head.isMaster());
 					head =head.next;
 				}				
 			}
