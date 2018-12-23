@@ -63,7 +63,7 @@ public class HashChaining {
 	@Test
 	public void test() {
 		// TODO implement HashChaining
-		HashChainingTable hsC = new HashChainingTable(2);
+		HashChainingTable hsC = new HashChainingTable(5);
 		hsC.add(new Item("1".toCharArray(), "aaa".toCharArray()));
 		hsC.add(new Item("2".toCharArray(), "bbb".toCharArray()));
 		hsC.add(new Item("3".toCharArray(), "ccc".toCharArray()));
@@ -85,11 +85,15 @@ public class HashChaining {
 
 		hsC.delete("2".toCharArray());
 		hsC.print();
+		
+		hsC.delete("4".toCharArray());
+		hsC.print();
 	}
 
 	class HashChainingTable {
 
 		ItemList[] listTable = null;
+		ItemList headList , tailList;
 		int capacity;
 
 		public HashChainingTable(int capacity) {
@@ -113,7 +117,20 @@ public class HashChaining {
 
 		public void add(Item item) {
 			int hash = getHash(item.key);
-			// 예외case가 존재하나..?
+			
+			// ITEMLIST를 NEXT로 가리키게 하면, HASHTABLE 모든 Loop 안거치고, 출력가능
+			// head가 null이라는 의미는 새로운 ITEMLIST 라는 의미로, ITEM값 할당전에,NEXTLIST로써, 가리키게 한다.
+			// 그냥 똑같이 LinkedList 구현하면 된다 그냥 똑같이 해..그게 간편하다.
+			if (listTable[hash].head == null){
+				if ( headList == null ) {
+					headList = listTable[hash];
+					tailList = listTable[hash];
+				}else{
+					tailList.nextList = listTable[hash]; 
+					tailList = listTable[hash];					
+				}
+			}
+			
 			listTable[hash].add(item);
 		}
 
@@ -149,7 +166,21 @@ public class HashChaining {
 		}
 
 		public void print() {
+			//ITEMLIST를 NEXT로 가리키게 하면, HASHTABLE 모든 Loop 안거치고, 출력가능
+			ItemList list = headList; 
+			int c = 0;
+			while( list != null ) {
+				Item h = list.head;
+				System.out.println("# INDEX - " + c++);
+				while (h != null) {
+					System.out.println("## " + new String(h.key) + ":" + new String(h.data));
+					h = h.next;
+				}				
+				list = list.nextList;
+			}
+			/*
 			for (int c = 0; c < this.capacity; c++) {
+				
 				ItemList list = listTable[c];
 
 				if (list.head != null) {
@@ -162,6 +193,7 @@ public class HashChaining {
 					}
 				}
 			}
+			*/
 
 		}
 
@@ -180,7 +212,7 @@ public class HashChaining {
 
 	class ItemList {
 		Item head, tail;
-		ItemList nextList;
+		ItemList nextList = null;
 		void add(Item nItem) {
 			if (head == null) {
 				head = nItem;
