@@ -120,14 +120,14 @@ void addSchedule(int id, DATE date, REPEAT repeat) {
 void deleteScheduleByID(int id) {
 	printf("delete ID = %d\n" , id);
 	int cnt = IDList[id].dateCnt; 
-	for (int i = 0; i < cnt; i++) {
+	for (int i = 1; i <= cnt; i++) {
 		int dateCnt = IDList[i].dateCnt;
-		for (int j = 0; j < dateCnt; j++) {
+		for (int j = 1; j <= dateCnt; j++) {
 			int year = 2099 - IDList[i].date[dateCnt].year;
 			int month = IDList[i].date[dateCnt].month;
 			int day = IDList[i].date[dateCnt].day;
 			int idCnt = calendar[year][month][day].idCnt; 
-			for (int i = 0; i < idCnt; i++) {
+			for (int i = 1; i <= idCnt; i++) {
 				if (calendar[year][month][day].id[i] == id) {
 					calendar[year][month][day].id[i] = -1;
 				}
