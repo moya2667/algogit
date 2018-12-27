@@ -22,7 +22,7 @@ struct REPEAT {
 	int cnt;
 };
 
-#define MAX 10
+#define MAX 30
 
 struct Calendar {
 	int id[MAX + 1]; //몇개까지 담아야하나
@@ -49,7 +49,12 @@ void init() {
 		for (int j = 0; j < 13; j++) {
 			for (int k = 0; k < 32; k++) {
 				calendar[i][j][k].deleteFlag = 0;
-				calendar[i][j][k].id = { 0 }; //구조체 배열 초기화 왜 안돼.!!!!!!
+				//calendar[i][j][k].id =  0 ; //구조체 배열 초기화 왜 안돼.!!!!!!
+
+				for (int z = 0; z < MAX + 1; z++) {
+					calendar[i][j][k].id[z] = 0;
+				}
+
 				calendar[i][j][k].idCnt = 0;
 			}
 		}
@@ -64,11 +69,13 @@ void init() {
 	}
 }
 
-void updateCalendar(int id, DATE date, REPEAT repeat) {
+
+void addSchedule(int id, DATE date, REPEAT repeat) {
+	//printf("id = %d %d %d %d repeat = %d %d\n", id, date.year, date.month, date.day, repeat.type, repeat.cnt);
 	int lastDay = daysOfMonth(date.year, date.day);
-	int d = date.day;
+	int y = date.year % 2000;
 	int m = date.month;
-	int y = 2099 - date.year;
+	int d = date.day;
 
 	//date + repeat 이용하여,  calendar에 id 저장
 	for (int i = 0; i < repeat.cnt; i++) {
@@ -97,10 +104,12 @@ void updateCalendar(int id, DATE date, REPEAT repeat) {
 
 		//변경된 y , m , d 에 대한 구조체를 할당한다.
 		DATE newDate;
-		newDate.year = 2099 - y;
+		newDate.year = y % 2000;
 		newDate.month = m;
 		newDate.day = d;
 		IDList[id].date[IDList[id].dateCnt] = newDate;
+
+		printf("id = %d %d %d %d repeat = %d %d\n", id, newDate.year, newDate.month, newDate.day, repeat.type, repeat.cnt);
 
 		switch (repeat.type) {
 		case NONE:
@@ -128,12 +137,6 @@ void updateCalendar(int id, DATE date, REPEAT repeat) {
 		}
 
 	}
-
-}
-
-void addSchedule(int id, DATE date, REPEAT repeat) {
-	printf("id = %d %d %d %d repeat = %d %d\n", id, date.year, date.month, date.day, repeat.type, repeat.cnt);
-	updateCalendar(id, date, repeat);
 }
 
 //ID에 대한 DATE 들을 삭제 하고, IDLIST 에서 ID를 삭제한다 
@@ -149,7 +152,7 @@ void deleteScheduleByID(int id) {
 	for (int i = 1; i <= dateCnt; i++) {
 		DATE date = IDList[id].date[i];
 
-		int y = 2099 - date.year;
+		int y = date.year % 2000;
 		int m = date.month;
 		int d = date.day;
 		//calendar 에서 ID 를 찾아서 해당 ID를 삭제한다 
@@ -169,11 +172,11 @@ void deleteScheduleByID(int id) {
 void deleteScheduleByDate(DATE date) {
 	printf("deleteScheduleByDate : %d %d %d \n", date.year, date.month, date.day);
 
-	int y = 2099 - date.year;
+	int y = date.year % 2000;
 	int m = date.month;
 	int d = date.day;
 
-	if (calendar[y][m][d].deleteFlag = 1) {
+	if (calendar[y][m][d].deleteFlag == 1) {
 		printf("이미 해당 date 은 삭제되어서 id 가 존재하지 않습니다\n");
 		return;
 	}
@@ -182,8 +185,8 @@ void deleteScheduleByDate(DATE date) {
 
 	//for debugging 
 	int idCnt = calendar[y][m][d].idCnt;
-	printf("delete flag = %d\n", calendar[y][m][d].deleteFlag);
-	for (int i = 0; i < idCnt; i++) {
+	//printf("delete flag = %d\n", calendar[y][m][d].deleteFlag);
+	for (int i = 1; i <= idCnt; i++) {
 		int id = calendar[y][m][d].id[i];
 		printf("id = %d delete flag = %d\n", id, calendar[y][m][d].deleteFlag);
 	}
@@ -191,13 +194,13 @@ void deleteScheduleByDate(DATE date) {
 
 
 int searchSchedule(DATE from, DATE to) {
-	printf("searchSchedule %d-%d  --> %d-%d\n", from.month, from.day, to.month, to.day);
-	//deleteFlag 를 살려야함;
-	int y = 2099 - from.year;
+	printf("searchSchedule %d/%d  --> %d/%d\n", from.month, from.day, to.month, to.day);
+	//deleteFlag 를 고려필요;
+	int y = from.year % 2000;
 	int m = from.month;
 	int d = from.day;
 
-	int y1 = 2099 - to.year;
+	int y1 = to.year % 2000;
 	int m1 = to.month;
 	int d1 = to.day;
 
@@ -210,16 +213,14 @@ int searchSchedule(DATE from, DATE to) {
 			//12월이 아닐경우 
 			d = d - lastDay;
 			if (from.month == 12) {
-				y = y - 1; //역 계산 (년도 증가)
+				y = y + 1; //역 계산 (년도 증가)
 				m = 1; //1월 
 			}
 			else {
 				m = from.month + 1;
 			}
 		}
-		else {
-			m = from.month;
-		}
+
 
 		//삭제된 경우가 아니라면 id 의 delete flag 를 제외하고 counting 한다 (주석을 달아야겠다)
 		if (calendar[y][m][d].deleteFlag != 1) {
@@ -227,7 +228,7 @@ int searchSchedule(DATE from, DATE to) {
 			for (int i = 1; i <= idCnt; i++) {
 				//id가 존재한다면  (-1 or 0 이 아니면) counting 
 				if (calendar[y][m][d].id[i] > 0) {
-					printf("%d-%d-%d : %d \n", 2099 - y, m, d, calendar[y][m][d].id[i]);
+					printf("id = %d  %d-%d-%d \n", calendar[y][m][d].id[i], y%2000, m, d);
 					counting++;
 				}
 			}
