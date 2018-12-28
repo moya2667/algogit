@@ -22,7 +22,7 @@ struct REPEAT {
 	int cnt;
 };
 
-#define MAX 30
+#define MAX 100
 
 struct Calendar {
 	int id[MAX + 1]; //몇개까지 담아야하나
@@ -71,8 +71,9 @@ void init() {
 
 
 void addSchedule(int id, DATE date, REPEAT repeat) {
+	printf("addSchedule :  id = %d %d %d %d repeat = %d %d\n", id, date.year, date.month, date.day, repeat.type, repeat.cnt);
 	//printf("id = %d %d %d %d repeat = %d %d\n", id, date.year, date.month, date.day, repeat.type, repeat.cnt);
-	int lastDay = daysOfMonth(date.year, date.day);
+	//int lastDay = daysOfMonth(date.year, date.month);
 	int y = date.year % 2000;
 	int m = date.month;
 	int d = date.day;
@@ -80,40 +81,42 @@ void addSchedule(int id, DATE date, REPEAT repeat) {
 	//date + repeat 이용하여,  calendar에 id 저장
 	for (int i = 0; i < repeat.cnt; i++) {
 
+		int lastDay = daysOfMonth(y, m);
+
 		if (d > lastDay) {
 			//12월이 아닐경우 
 			d = d - lastDay;
 			if (date.month == 12) {
-				y = y - 1; //연도 증가
-				m = 1;
+				y++; //연도 증가
+				m = 1;				
 			}
 			else {
-				m = date.month + 1;
+				m++;
+				//lastDay = daysOfMonth(y, m);
 			}
 		}
-		else {
-			m = date.month;
-		}
+		
 
-		calendar[y][m][d].idCnt = calendar[y][m][d].idCnt + 1;
+		calendar[y][m][d].idCnt++;
 		int cnt = calendar[y][m][d].idCnt;
 		calendar[y][m][d].id[cnt] = id;
+		calendar[y][m][d].deleteFlag = 0;
 
-		int dateCnt = IDList[id].dateCnt;
-		IDList[id].dateCnt = dateCnt + 1;
+		
+		IDList[id].dateCnt++;		
 
 		//변경된 y , m , d 에 대한 구조체를 할당한다.
 		DATE newDate;
 		newDate.year = y % 2000;
 		newDate.month = m;
 		newDate.day = d;
-		IDList[id].date[IDList[id].dateCnt] = newDate;
+		IDList[id].date[ IDList[id].dateCnt ] = newDate;
+		IDList[id].deleteFlag = 0;
 
-		printf("id = %d %d %d %d repeat = %d %d\n", id, newDate.year, newDate.month, newDate.day, repeat.type, repeat.cnt);
+		//printf("id = %d %d %d %d repeat = %d %d\n", id, newDate.year, newDate.month, newDate.day, repeat.type, repeat.cnt);
 
 		switch (repeat.type) {
-		case NONE:
-			d = date.day;
+		case NONE:			
 			break;
 		case DAILY:
 			d = d + 1;
@@ -122,8 +125,15 @@ void addSchedule(int id, DATE date, REPEAT repeat) {
 			d = d + 7;
 			break;
 		case MONTHLY:
+			if (m == 12) {
+				m = 1;
+				y++;
+			}else{
+				m++;
+			}
 			break;
 		case YEARLY:
+			y++;
 			break;
 		case EVERY3DAYS:
 			d = d + 3;
@@ -188,7 +198,7 @@ void deleteScheduleByDate(DATE date) {
 	//printf("delete flag = %d\n", calendar[y][m][d].deleteFlag);
 	for (int i = 1; i <= idCnt; i++) {
 		int id = calendar[y][m][d].id[i];
-		printf("id = %d delete flag = %d\n", id, calendar[y][m][d].deleteFlag);
+		printf("id = %d id's delete flag = %d\n", id, IDList[id].deleteFlag);
 	}
 }
 
@@ -199,25 +209,31 @@ int searchSchedule(DATE from, DATE to) {
 	int y = from.year % 2000;
 	int m = from.month;
 	int d = from.day;
+	if (_DEBUG) { 
+		if (m == 2 && d == 11) {
+			printf("a\n");
+		}
+	}	
 
 	int y1 = to.year % 2000;
 	int m1 = to.month;
 	int d1 = to.day;
 
 	int counting = 0;
-	int lastDay = daysOfMonth(from.year, m);
+	
 
 	while (1) {
+		int lastDay = daysOfMonth(y, m);
 		//day 계산
 		if (d > lastDay) {
 			//12월이 아닐경우 
 			d = d - lastDay;
-			if (from.month == 12) {
-				y = y + 1; //역 계산 (년도 증가)
+			if (m == 12) {
+				y++; //역 계산 (년도 증가)
 				m = 1; //1월 
 			}
 			else {
-				m = from.month + 1;
+				m++;
 			}
 		}
 
@@ -232,12 +248,13 @@ int searchSchedule(DATE from, DATE to) {
 					counting++;
 				}
 			}
-
-			if (y == y1 && m == m1 && d == d1) {
-				printf("To => %d %d %d  까지 왔습니다. 나갑니다\n", y1, m1, d1);
-				break;
-			}
 		}
+
+		if (y == y1 && m == m1 && d == d1) {
+			//printf("To => %d %d %d  까지 왔습니다. 나갑니다\n", y1, m1, d1);
+			break;
+		}
+
 		//하루씩 증가
 		d = d + 1;
 	}
