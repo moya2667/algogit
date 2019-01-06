@@ -119,6 +119,7 @@ int AddPlayer(int pid, int location, int power) {
 		//해당 club 에 들어갈수 있으면 , 해당 club 에 선수를 넣는다.
 		if (!isFull(clubs[cid])) {
 			players[pid].clubID = cid;
+			//TO DO LIST : 거리가 가장 가까운 club에 Player를 ADD하는 코드 작성 (Linked연결) 
 			clubs[cid].playerCnt++; //clud안에 player 등록 수 증가
 			return cid;
 		}
