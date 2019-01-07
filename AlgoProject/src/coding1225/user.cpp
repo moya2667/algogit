@@ -7,6 +7,8 @@ struct Player {
 	int location;
 	int power;
 	int clubID; //Player가 속해있는 club ID
+	int pid; //본인 id
+	int priority;
 };
 
 struct Club {
@@ -89,6 +91,15 @@ void Init(int L, int N, int C, int location[MAX_CLUB]) {
 void print() {
 	for (int i = 0; i < CLUB_NUMBER; i++) {
 		printf("club id= %d location = %d cnt = %d\n", clubs[i].clubID, clubs[i].location, clubs[i].playerCnt);
+
+	}
+}
+
+void print(int cid) {
+	Player* h = clubs[cid].head;
+	while (h != nullptr) {
+		printf("player id: %d location : %d power= %d\n", h->pid, h->location, h->power);
+		h = h->next;
 	}
 }
 
@@ -107,25 +118,44 @@ void sort(Club club) {
 	
 }
 
+void addClubToPlayer(int cid, Player* player) {
+	clubs[cid].playerCnt++; //clud안에 player 등록 수 증가	
+	
+	//그냥 넣는게 아니네.. prioirty 근간으로 넣어야지.
+	if (clubs[cid].head == nullptr) {
+		clubs[cid].head = player;
+		clubs[cid].tail = player;
+	}
+	else {
+		clubs[cid].tail->next = player;
+		player->prev = clubs[cid].tail;
+		clubs[cid].tail = player;
+		player->next = nullptr;
+	}
+}
+
 int AddPlayer(int pid, int location, int power) {
 	if (DEBUG) printf("[%s] pid(%d) location(%d) power(%d)\n", __FUNCTION__, pid, location, power);
 	players[pid].location = location;
 	players[pid].power = power;
+	players[pid].pid = pid;
 	int searchStep =  0;
 	while(1){
 		//해당 Player 가 가장 가까운 Club ID 를 가져온다 
 		int cid = getMinLocationTeam(players[pid], searchStep);
-
+		players[pid].priority = power * 10001 + 10000 - pid;
+		
 		//해당 club 에 들어갈수 있으면 , 해당 club 에 선수를 넣는다.
 		if (!isFull(clubs[cid])) {
-			players[pid].clubID = cid;
-			//TO DO LIST : 거리가 가장 가까운 club에 Player를 ADD하는 코드 작성 (Linked연결) 
-			clubs[cid].playerCnt++; //clud안에 player 등록 수 증가
+			players[pid].clubID = cid;			
+			//TO DO LIST : 거리가 가장 가까운 club에 Player를 ADD하는 코드 작성 (Linked연결)
+			addClubToPlayer(cid, &players[pid]);
+			print(cid);
 			return cid;
 		}
 
 		//들어갈수 없으나, 
-		sort(clubs[cid]);
+		//sort(clubs[cid]);
 
 		//해당 Club 소속 선수의 능력치가 낮을경우 신규소속 선수 넣는다, 
 		//능력치가 동일할 경우 , pid가 더 낮은 선수를 넣는다	
