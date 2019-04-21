@@ -9,15 +9,19 @@ public class Hash {
 	public void test() {
 		MOYAHash h = new MOYAHash(2);
 		h.put("aa".toCharArray() ,1);
-		h.put("bb".toCharArray() ,2 );
+		h.put("bb".toCharArray() ,2 );		
 		h.put("cc".toCharArray() ,3);
-		h.put("dd".toCharArray() ,4);
-		h.put("ee".toCharArray() ,5);
+		h.put("dd".toCharArray() ,4);		
+		h.put("ee".toCharArray() ,5);		
+		h.put("f".toCharArray() ,5);		
+		h.put("g".toCharArray() ,5);
+		h.put("h".toCharArray() ,5);
+		h.put("i".toCharArray() ,5);
 
-		h.delete("aa".toCharArray());
-		h.update("bb".toCharArray(), 123);
+		//h.delete("aa".toCharArray());
+		//h.update("bb".toCharArray(), 123);
 
-		Item item = h.get("bb".toCharArray());
+ 		Item item = h.get("bb".toCharArray());
 		System.out.println("item = " + item.v);
 		h.print();
 	}
@@ -104,12 +108,13 @@ public class Hash {
 			}
 			tail.next = e;
 			e.prev = tail;
+			tail = e; //아 돌아버리겠네.
 		}
 
 		public boolean update(char[] charArray, int i) {
 			Item h = head;
 			while( h != null) {
-				if (h.deleteF = false && equalto(charArray, h.d)) {
+				if (h.deleteF == false && equalto(charArray, h.d)) {
 					h.v = i;
 					return true;
 				}
