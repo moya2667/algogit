@@ -28,7 +28,7 @@ public class directory {
 	
 	**/
 	
-	boolean debug = true;
+	boolean debug = false;
 	moyatree tree ;	
 	void init(){
 		tree = new moyatree();		
@@ -39,8 +39,11 @@ public class directory {
 		// /a path 에 a1 directory 생성
 		add("/\0","a\0");
 		add("/\0","b\0");
+		tree.print(tree.root, 0);
 		
 		add("/a\0","a1\0");
+		tree.print(tree.root, 0);
+		
 		add("/a\0","a2\0");
 		add("/a/a2\0","aa1\0");
 		add("/b\0","b1\0");
@@ -76,12 +79,49 @@ public class directory {
 		//root 아닐경우 노드 찾고 ,child 로 등록   	
 		}else{
 			tnode f = tree.find(cPaths);
-			//f가 null일 경우 , 부모 노드를 알고 , 생성해야한다. ?????
 			
+			/*
+			//f가 null일 경우 , 부모 노드를 알고 , 생성해야한다. ????? -> 하..이 로직이 필요없는거였네...ㅜㅜ 어쩐지...
+			 * f가 null 일수없다...ㅜㅜ
+			if ( f == null) { 
+				//add("/a\0","a1\0");
+				char[] parentPath = new char[10];
+				char[] child = new char[10];
+				getParsing(cPaths , parentPath , child);
+				tnode p = tree.find(parentPath);
+				
+				f = tree.add(p,cPaths);
+				
+			}
+			*/			
+			System.out.println("");
 			tree.add(f, cDirectory);
 		}
 		
 	}
+	
+	void getParsing(char[] path , char[] parent , char[] child) {
+		int l = path.length;
+		// -> / 첫번째 나온 값을 시작으로 , 저장 
+		// / count 구하기 
+		int idx = 0 ; 
+		for (int i = l-1 ; i <= 0; i--) {
+			if (path[i] =='/') {
+				idx = i;
+				break;
+			}			
+		}
+		
+		for (int i = 0 ; i <= idx ; i++) {
+			parent[i] = path[i];
+		}
+		
+		int c =0;
+		for (int i = idx+1 ; i <= l-(idx+1) ; i++) {
+			child[c++] = path[i];
+		}
+	}
+	
 	boolean isRoot(char[] path){		
 		int len = path.length;
 		for (int i = 0; i < len ; i++) {
@@ -106,10 +146,11 @@ public class directory {
 		public moyatree(){			
 			hash = new MOYAHash(71993);			
 			//root 
-			char[] r = new char[2];
+			char[] r = new char[10];
 			r[0] ='/';
 			r[1] ='\0';		
 			root = new tnode(r);
+			root.setFullPath(r);
 			hash.put(r, root);
 		}
 		
@@ -129,9 +170,36 @@ public class directory {
 				n.prev = p.cTail; 
 				p.cTail = n;
 			}
-			hash.put(v, n);
+			
+			char[] path = getFullPath(p.v , v);
+			n.setFullPath(path);
+
+			hash.put(path, n);			
 			return n;
 		}
+		private char[] getFullPath(char[] v, char[] v2) {
+			//add full path key 
+			int len = v.length;
+			char[] path = new char[10];
+			int cnt = 0;
+			for (int i = 0; i < len ; i++) {
+				if (v[i] == '\0') {
+					cnt = i;
+					break;
+				}
+				path[i] = v[i];
+			}
+			
+			for (int i = 0 ; i < len ; i++) {
+				path[cnt++] = v2[i];
+				if (v2[i] == '\0' ) { 
+					break;
+				}
+			}			
+			
+			return path;
+		}
+
 		//v에 해당하는 값 찾아서, 삭제 
 		void delete(char[] v){
 			if (find(v)!=null ){ 
@@ -146,6 +214,24 @@ public class directory {
 			return hash.get(path);
 		}
 		
+		tnode findChild(tnode p , char[] child) {
+			tnode H = p.cHead;
+			while(H!=null) { 
+				if (equalTo(p.v , child)){
+					return H;
+				}
+				H = H.next;
+			}
+			return null;
+		}
+		
+		boolean equalTo(char[] ori , char[] tar) {
+			for (int i = 0 ; i < ori.length ; i++) { 
+				if (ori[i] != tar[i] ) return false;
+			}
+			return true;
+		}
+		
 		void print(tnode r, int dep){ 
 			if (r == null) { 
 				return; 
@@ -153,7 +239,7 @@ public class directory {
 			for (int i = 0 ; i < dep ; i++) { 
 				System.out.print("+");
 			}
-			System.out.println(new String(r.v));
+			System.out.println(new String(r.fullpath));
 			
 			if (r.cHead == null) return; 
 			
@@ -170,6 +256,7 @@ public class directory {
 	}
 	class tnode{
 		char[] v;
+		char[] fullpath;
 		tnode parent;
 		tnode cHead,cTail; //TNode child
 		tnode next,prev; 
@@ -178,7 +265,14 @@ public class directory {
 			for(int i =0; i < va.length ;i++){
 				v[i]= va[i];
 			}
-		}		
+		}
+		public void setFullPath(char[] path) { 
+			int len = path.length;
+			fullpath = new char[len];
+			for (int i = 0; i < len; i++) {
+				fullpath[i] = path[i];
+			}
+		}
 	}	
 
 	void change(String ori , String ori2, char[] a , char[] b) { 
@@ -187,9 +281,12 @@ public class directory {
 		for (int i = 0; i < o.length; i++) {
 			a[i] = o[i];
 		}
+		
+		
 		for (int i = 0; i < o1.length; i++) {
 			b[i] = o1[i];
 		}
+		
 		if (debug) { 
 			//debugging
 			for (int i = 0; i < o.length; i++) {
