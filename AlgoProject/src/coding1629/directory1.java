@@ -2,6 +2,8 @@ package coding1629;
 
 import static org.junit.Assert.*;
 
+import java.io.ObjectInputStream.GetField;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,51 +46,107 @@ public class directory1 {
 		add("/a\0","a1\0");
 		
 		add("/a\0","a2\0");		
-		add("/a/a2\0","aa1\0");
+		add("/a/a2\0","aa1\0");		
 		
 		add("/b\0","b1\0");
 		tree.print(tree.root, 0);
 		
-		//tree.print(tree.root, 0);
-		/*
 		// move 		
-		move("/a/a2\0","/b/");
+		move("/a/a2/aa1\0","/b\0");
+		tree.print(tree.root, 0);
+				
+		
+		/*
 		// copy
-		copy("/b/a2\0","/a1");
+		copy("/a/a2\0","/b/b1\0");
+		copy("/a\0","/b/b1\0");
+		tree.print(tree.root, 0);
 		*/
+		
+		
+		
+		
 		
 		// count
 		
 	}
 	
 	 void copy(String path, String path2) {
-		char[] cPath = new char[10];
-		char[] cPath2 = new char[10];
+		System.out.println("copy ~~ ");
+		char[] cPath = new char[20];
+		char[] cPath2 = new char[20];
 		change(path , path2, cPath , cPath2);
-		//tnode f = tree.find(cPath);
-		//tree.add(f, cPath2);
+		
+		tnode ori = tree.getFind(cPath);
+		tnode target = tree.getFind(cPath2);
+		
+		//ori 노드를 target 노드로 복사한다.
+		copyRecursion(target , ori);
+
+	}
+	 
+	 void move(String path , String path2) { 
+		System.out.println("move");
+		 
+		char[] cPath = new char[20];
+		char[] cPath2 = new char[20];
+		change(path , path2, cPath , cPath2 );
+		
+		tnode ori = tree.getFind(cPath);
+		tnode target = tree.getFind(cPath2);
+		
+		//target 을 ori의 child 에 넣어라.
+		tree.move(ori , target);
+		
+	}
+	 
+	 
+
+	 
+	 
+	void copyRecursion(tnode t , tnode ori) { 
+		
+		if (t == null )return;
+		
+		//null 이 아니면 붙여넣는다.
+		//tnode n = add( new String(t.fullpath) , new String(ori.dname) );
+		tnode n = tree.add(t, ori.dname);
+		
+		//복사할 대상에 child가 있다면, child 도 넣는다.
+		tnode o = ori.cHead;
+		
+		//child 노드가 존재한다면 
+		while(o!=null) {
+			//복사된 노드를 찾아서, 그 하위에 넣는다.
+			//tnode f = tree.getFind(n.fullpath);
+			copyRecursion(n,o);
+			
+			System.out.println("부모 = " + new String(ori.dname) + "자식 = " + new String(o.dname) );
+			o = o.next;
+		}
 	}
 
-	void add(String path , String directory) {
-		char[] cPaths = new char[10];
-		char[] cDirectory = new char[10];		
+	tnode add(String path , String directory) {
+		char[] cPaths = new char[20];
+		char[] cDirectory = new char[20];		
 		change(path , directory , cPaths , cDirectory );		
 		
 		//root 일경우 root parent 를 넣고 하위에 /a 값 생성 
 		if (isRoot(path.toCharArray())){
-			tree.add(tree.root ,cDirectory);
+			return tree.add(tree.root ,cDirectory);
 		//root 아닐경우 노드 찾고 ,child 로 등록   	
 		}else{
-			tree.fi = null;
-			tree.find(tree.root,cPaths);
-			tnode f = tree.getfind();
+			
+			tnode f = tree.getFind(cPaths);
+			
 			if (f == null) { 
 				System.out.println("can't find parent path");
-				return;
+				return null;
 			}
 			//부모 f 에 하위 노드 생성 -> 아하 노드에서 생성해서 분리해야하구나. 
-			tree.add(f, cDirectory);
+			return tree.add(f, cDirectory);
 		}
+		
 	}
 	
 	
@@ -104,24 +162,27 @@ public class directory1 {
 		return true;
 	}
 	
-	void move(String path , String path2) { 
-		char[] cPath = new char[10];
-		char[] cPath2 = new char[10];
-		change(path , path2, cPath , cPath2 );
-	}
+	
 	
 	class moyatree {
 		
 		tnode root;
 		public moyatree(){
 			//root 
-			char[] r = new char[10];
+			char[] r = new char[20];
 			r[0] ='/';
 			r[1] ='\0';		
 			root = new tnode(r);
 			root.fullpath = r ;
 		}
 		
+		public tnode getFind(char[] cPath) {
+			// TODO Auto-generated method stub
+			fi = null;
+			find( root, cPath);
+			return fi;
+		}
+
 		//p의 자식노드를 생성하고, v 값 할당 
 		tnode add(tnode p , char[] v){
 			//child node 생성 
@@ -139,6 +200,41 @@ public class directory1 {
 				p.cTail = n;
 			}						
 			return n;
+		}
+		
+		//or 노드 하위에 t 노드를  붙인다  
+		tnode move(tnode t , tnode or){
+			
+			/* 삭제코드
+			tnode pH = t.parent.cHead;
+			while(pH!=null) {
+				//같으면, 링크를 전달한다.
+				if (pH.equalTo(pH.dname, t.dname)){
+					if (pH == head && pH == tail) { 
+						pH = null;
+						
+					}
+				}
+				
+				pH = pH.next;
+			}
+			*/
+			
+			t.parent = or ;
+			//양쪽 끈기 
+			t.next =  null;
+			t.prev =  null;
+			
+			if (or.cHead == null) {
+				or.cHead = t;
+				or.cTail = t;
+			}else{
+				//보기가 더 해깔리네.
+				or.cTail.next = t; 
+				t.prev = or.cTail; 
+				or.cTail = t;
+			}						
+			return or;
 		}
 
 		//v에 해당하는 값 찾아서, 삭제 
@@ -204,7 +300,7 @@ public class directory1 {
 			for (int i = 0 ; i < dep ; i++) { 
 				System.out.print("+");
 			}
-			System.out.println(new String(r.fullpath));
+			System.out.println(new String(r.dname));
 			
 			if (r.cHead == null) return; 
 			
@@ -256,6 +352,34 @@ public class directory1 {
 				}
 			}
 		}
+		
+		void setFullPath(tnode p , char[] directory) {
+			fullpath = new char[20]; //init
+			char[] parentPath = p.fullpath;
+			
+			int cnt =0 ;
+			for (int i = 0; i < parentPath.length; i++) {
+				if (parentPath[i] == '\0'){
+					if (!isRoot(parentPath)){
+						fullpath[cnt++] = '/';
+					}
+					break;
+				}
+				fullpath[cnt++]= parentPath[i];				
+			}
+			
+			for (int i = 0; i < directory.length; i++) {
+				fullpath[cnt++] = directory[i];
+				//name 따로 저장 
+				this.dname[i] = directory[i];
+				if (directory[i] == '\0') {
+					//name은 \0 까지저장
+					this.dname[i] = directory[i];
+					break;
+				}
+			}
+		}
+		
 		
 		boolean isRoot(char[] parentPath){
 			if(parentPath[0] =='/' && parentPath[1]=='\0') return true;
