@@ -45,29 +45,17 @@ public class directory1 {
 		add("/\0","b\0");		
 		add("/a\0","a1\0");
 		
-		add("/a\0","a2\0");		
-		add("/a/a2\0","aa1\0");		
+		add("/a\0","a2\0");
+		add("/a/a2\0","aa0\0");
+		add("/a/a2\0","aa1\0");
+		add("/a/a2\0","aa2\0");
 		
 		add("/b\0","b1\0");
 		tree.print(tree.root, 0);
 		
 		// move 		
-		move("/a/a2/aa1\0","/b\0");
-		tree.print(tree.root, 0);
-				
-		
-		/*
-		// copy
-		copy("/a/a2\0","/b/b1\0");
-		copy("/a\0","/b/b1\0");
-		tree.print(tree.root, 0);
-		*/
-		
-		
-		
-		
-		
-		// count
+		//move("/a\0","/b/b1\0");
+		//tree.print(tree.root, 0);
 		
 	}
 	
@@ -96,12 +84,8 @@ public class directory1 {
 		tnode target = tree.getFind(cPath2);
 		
 		//target 을 ori의 child 에 넣어라.
-		tree.move(ori , target);
-		
+		tree.move(ori , target);		
 	}
-	 
-	 
-
 	 
 	 
 	void copyRecursion(tnode t , tnode ori) { 
@@ -176,10 +160,24 @@ public class directory1 {
 			root.fullpath = r ;
 		}
 		
-		public tnode getFind(char[] cPath) {
-			// TODO Auto-generated method stub
+		public tnode getFind(char[] cPath) {			
 			fi = null;
-			find( root, cPath);
+			char[][] map = new char[10][10];
+			int cnt = 1 ;
+			int dataC = 0 ;
+			for (int i = 1; i < cPath.length; i++) {
+				if( cPath[i] =='\0')
+					break;
+					
+				if ( cPath[i] =='/'){
+					cnt++;
+					dataC=0;									 
+				}else{
+					map[cnt][dataC++] = cPath[i];
+				}
+			}
+			
+			findTree( root, map , cnt , 0);
 			return fi;
 		}
 
@@ -203,23 +201,43 @@ public class directory1 {
 		}
 		
 		//or 노드 하위에 t 노드를  붙인다  
-		tnode move(tnode t , tnode or){
+		tnode move(tnode t , tnode or){			
 			
-			/* 삭제코드
+			//t의 부모 노드에서 child 제거
 			tnode pH = t.parent.cHead;
+			tnode head = t.parent.cHead;
+			tnode tail = t.parent.cTail;
 			while(pH!=null) {
 				//같으면, 링크를 전달한다.
-				if (pH.equalTo(pH.dname, t.dname)){
+				if (isEqual(pH.dname, t.dname)){
+					//하나일경우 
 					if (pH == head && pH == tail) { 
-						pH = null;
 						
+						t.parent.cHead = null;
+						print(tree.root, 0);
+						break;
 					}
+					
+					if (pH == head) {
+						t.parent.cHead = pH.next ;
+						pH.prev = null;						
+					}else if (pH == tail) {						
+						t.parent.cTail = pH.prev; 
+						t.parent.cTail.next = null;						
+					}else{
+					
+						tnode pe = pH.prev;
+						tnode ne = pH.next;
+						pe.next = ne;
+						ne.prev = pe;
+					}
+					break;
 				}
 				
 				pH = pH.next;
 			}
-			*/
 			
+			//or 하위에 t node 붙이기
 			t.parent = or ;
 			//양쪽 끈기 
 			t.next =  null;
@@ -259,23 +277,26 @@ public class directory1 {
 			return fi;
 		}
 		
-		boolean find(tnode t , char[] path){
+		void findTree(tnode t , char[][] path , int exit , int depth ){
 			//for hashing			
-			if ( t == null) return false;
+			if ( t == null) return;
 			
-			if (isEqual(t.fullpath , path) ) {				
+			if (depth == exit ) {
 				fi = t;
-				return true;
+				return ; 
 			}
 			
-			tnode h = t.cHead;
-			while(h!=null) {
-				find(h,path);
-				if (fi != null) return true;
-				h = h.next;
+			tnode child = t.cHead;
+			
+			while(child != null) { 
+				if ( isEqual(child.dname , path[depth+1] )) {
+					findTree(child , path , exit , depth+1);
+					return;
+				}				
+				child = child.next;
 			}
-			return false;
 		}
+		
 				
 		
 		boolean isEqual(char[] fullpath, char[] path) {
