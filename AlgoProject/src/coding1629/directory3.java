@@ -18,10 +18,10 @@ public class directory3 {
 		add("/\0","a\0");		
 		add("/\0","b\0");
 		add("/a\0","a1\0");
-		mytree.print(root, 0);
+		//mytree.print(root, 0);
 		
 		add("/a\0","a2\0");
-		mytree.print(root, 0);
+		//mytree.print(root, 0);
 		add("/a/a2\0","aa0\0");
 		add("/a/a2\0","aa1\0");
 		add("/a/a2\0","aa2\0");
@@ -30,11 +30,17 @@ public class directory3 {
 		
 		mytree.print(root, 0);
 		
-		//copy 
-		copy("/a/a2\0","/b/b1\0");
-		
+
 		// move 		
-		move("/a\0","/b/b1\0");
+		move("/a/a2\0","/b/b1\0");
+		
+		mytree.print(root, 0);
+		
+		//copy 
+		copy("/b/b1/a2\0","/a/a1\0");
+		
+		mytree.print(root, 0);
+		
 	}
 	
 	void add(String ori, String tar) {
@@ -99,12 +105,32 @@ public class directory3 {
 	}
 
 	void move(String ori, String tar) {
-	
+		char[] cori = new char[MAX];
+		char[] ctar = new char[MAX];
+		//char 화
+		change(ori , tar , cori , ctar);
+		
+		node ori_f = find(cori);
+		node tar_f = find(ctar);
+		
+		if (ori_f != null && tar_f != null) { 
+			mytree.move(ori_f , tar_f);
+			return;
+		}
+		System.out.println("we can not move node ");
 		return;
 	}
 
 	void copy(String ori, String tar) {
-		
+		char[] cori = new char[MAX];
+		char[] ctar = new char[MAX];
+		//char 화
+		change(ori , tar , cori , ctar);
+		node ori_f = find(cori);
+		node tar_f = find(ctar);
+		if (ori_f != null && tar_f != null) {
+			mytree.copy(ori_f,tar_f);
+		}
 	}
 	
 	
@@ -120,6 +146,30 @@ public class directory3 {
 			root = new node(r);
 		}
 		
+		//ori_f 값을 tar_f의 child 붙여넣어야 한다 에 넣어야 한다.
+		//tar_f 의 변경 값을 인자로 넘기고 , ori_f의 변경값도 인자로 넘기면서 같이 등록하는 방식 
+		void copy(node ori_f, node tar_f) {
+			
+			node n = add(tar_f, ori_f.folder);
+			
+			node h = ori_f.childs.head;
+			
+			while (h!=null){
+				//System.out.println(h.folder +"를 copy합니다" );
+				copy(h,n);
+				h = h.next;
+			}
+		}
+
+		void move(node ori_f, node tar_f) {
+			node oriP = ori_f.parent;
+			oriP.childs.deleteChild(ori_f);
+			
+			this.print(root, 0);			
+			
+			tar_f.childs.addChild(ori_f);
+		}
+
 		node add(node p, char[] ori) {
 			node n = new node(ori);
 			n.parent = p;
@@ -202,7 +252,7 @@ public class directory3 {
 	class link { 
 		node head, tail;		
 	
-		void addChild(node n) {
+		node addChild(node n) {
 			if (head == null) { 
 				head = n;
 				tail = n;
@@ -212,6 +262,7 @@ public class directory3 {
 				n.prev =tail;
 				tail = n;
 			}
+			return n;
 		}
 
 		void deleteChild(node n){
@@ -237,7 +288,10 @@ public class directory3 {
 						ne.prev = pe;
 					}					
 					
+					break;
 				}
+				
+				h = h.next;
 			}
 		}
 		boolean equal(char[] o , char[] t) { 
