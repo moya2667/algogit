@@ -55,21 +55,21 @@ public class sort {
 	static int initV = 9999999;
 	class link{
 		node head,tail;
+		link() { 
+			head =new node(initV);
+		}
 		public void addSort(int i) {			
 			node n = new node(i);
-			
-			if (head == null) { 
-				head =new node(initV);  
-			}
 			
 			//head next
 			node h = head.next;
 			//last = head 로 
 			node last = head;
+			
 			//cnt 로 5번째까지만 insert sort 
 			int cnt = 1; 
 			
-			while(h!= null && cnt <= 5) {
+			while(h!= null && cnt <= 4) {
 				cnt++;
 				if (h.v < n.v ) {
 					node pre = h.prev;
@@ -85,8 +85,10 @@ public class sort {
 				
 			}
 			
-			last.next = n;
-			n.prev = last;
+			if (cnt <= 4) { 
+				last.next = n;
+				n.prev = last;
+			}
 		}
 		
 		public void add(int i) {			
