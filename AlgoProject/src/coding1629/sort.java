@@ -32,12 +32,16 @@ public class sort {
 	
 	@Test
 	public void test() {
+		ll.addSort(11);		
+		ll.addSort(22);
+		ll.addSort(333);
+		ll.addSort(5);
+		ll.addSort(0);
 		ll.addSort(4);
 		ll.addSort(1);		
 		ll.addSort(2);
-		ll.addSort(5);
 		ll.addSort(3);
-		ll.addSort(0);
+		ll.addSort(8);
 		ll.print();
 	}
 	
@@ -53,16 +57,20 @@ public class sort {
 		node head,tail;
 		public void addSort(int i) {			
 			node n = new node(i);
-			node last = null; 
 			
 			if (head == null) { 
 				head =new node(initV);  
 			}
 			
-			node h = head;
-			while(h!= null) {				
-				//새로 들어온 값이 기존 H보다 작다면,앞으로 보낸다
-				//새로 들어온 값이 기존 H보다 크다면,앞으로 보낸다(?) 
+			//head next
+			node h = head.next;
+			//last = head 로 
+			node last = head;
+			//cnt 로 5번째까지만 insert sort 
+			int cnt = 1; 
+			
+			while(h!= null && cnt <= 5) {
+				cnt++;
 				if (h.v < n.v ) {
 					node pre = h.prev;
 					pre.next = n ;
@@ -73,7 +81,8 @@ public class sort {
 					return;
 				}				
 				last = h;
-				h = h.next;				
+				h = h.next;
+				
 			}
 			
 			last.next = n;
@@ -93,11 +102,9 @@ public class sort {
 		}
 
 		public void print() {
-			node h = head;
+			node h = head.next;
 			while(h!=null){
-				if (h.v != initV) { 
-					System.out.print(h.v +" ");
-				}
+				System.out.print(h.v +" ");
 				h =h.next;
 			}
 			System.out.println();
