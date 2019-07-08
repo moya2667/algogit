@@ -26,6 +26,7 @@ public class linksortdatareturn {
 		int score;
 		int y;
 		int x;
+		boolean istop = false;
 		home(){};
 		home(int id,int price,int score,int y,int x) { 
 			this.id = id;
@@ -71,6 +72,7 @@ public class linksortdatareturn {
 		search(0,5,5,answer);
 		print(answer);
 		
+		answer = new int[5];
 		search(1,5,5,answer);
 		
 		print(answer);
@@ -105,7 +107,9 @@ public class linksortdatareturn {
 			}
 		}else if (option == 1) { 
 			//리스트에 모두 담고 insert sort 가져오는 방법 
+			/*
 			ll homebubble = new ll();
+			
 			for (int i = 0; i < dy.length; i++) { //아무생각없이 2중 루프는 모냐.
 				
 				int myY = y+ dy[i];
@@ -137,8 +141,106 @@ public class linksortdatareturn {
 				cnt++;
 				
 			}
+			*/
+			
+			/*
+			int cnt = 0;
+			for (int i = 0 ; i < 5 ; i++) { 
+				ll homelist = getHomell(y,x);
+				
+				home h = homelist.head.next;
+				h.istop = true;
+				
+				answer[cnt++] = h.id;
+				System.out.println("최적화 = " + h.id);
+			}
+			*/
+			
+			int cnt = 0;
+			ll backupll = new ll();
+			for (int i = 0 ; i < 5 ; i++) { 
+				home minihome = getMiniHome(y, x);
+				
+				minihome.istop = true;
+				
+				answer[cnt++] = minihome.id;
+				System.out.println("최적화 = " + minihome.id);
+				backupll.add(minihome);
+			}
+			
+			//roll back
+			home h = backupll.head;
+			while(h!=null) { 
+				h.istop = false;
+				h= h.next;
+			}			
+		}
+	}
+	
+	private home getMiniHome(int y, int x) {
+		
+		home t = new home();
+		t.id = 100000; 
+		t.price = 1000000;
+		for (int i = 0; i < dy.length; i++) { //아무생각없이 2중 루프는 모냐.
+			
+			int myY = y+ dy[i];
+			int myX = x +dx[i];
+		
+			home h = map[myY][myX].head.next;
+			
+			//맨 앞에 있는 값(이미소트된값) 중 istop 이 false 인것 기준으로 가장 우선순위가 높은 숙소 리턴
+			while(h != null ) {
+				if (h.istop != true) {
+					if (!compare(h,t)){
+						t = h;
+					}
+					break;
+				}
+				h = h.next;
+			}
 			
 		}
+		
+		return t;
+	}
+	
+	//최저가이며, 가격이 같으면 평점이 높으며, 평점이 같으면 숙소ID가 높은순
+	boolean compare(home s , home h) { 
+		if (s.price > h.price) {
+			return true;
+		}
+		if (s.price == h.price) { 
+			if (s.score <h.score){
+				return true;
+			}else if (s.score == h.score) { 
+				if (s.id < h.id) return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	private ll getHomell(int y, int x) {
+		ll homebubble = new ll();
+		System.out.println("aa");
+		for (int i = 0; i < dy.length; i++) { //아무생각없이 2중 루프는 모냐.
+			
+			int myY = y+ dy[i];
+			int myX = x +dx[i];
+			
+		
+			home h = map[myY][myX].head.next;
+			while(h!=null ) {
+				if (h.istop != true) { 
+					homebubble.addinsertsort(h);
+					break;
+				}
+				h = h.next;
+			}
+		}
+		
+		return homebubble;
 	}
 	
 	private void addhomedbg(int y, int x) {
@@ -211,6 +313,31 @@ public class linksortdatareturn {
 				h.prev = last;
 			}
 			
+		}
+		
+		void addinsertsort(home h) {
+
+			home s = head.next;
+			home last = head;
+
+			while (s != null) {
+
+				if (compare(s, h)) {
+					home pre = s.prev;
+					pre.next = h;
+					h.prev = pre;
+
+					h.next = s;
+					s.prev = h;
+					return;
+				}
+				last = s;
+				s = s.next;
+			}
+
+			last.next = h;
+			h.prev = last;
+
 		}
 		
 		//최저가이며, 가격이 같으면 평점이 높으며, 평점이 같으면 숙소ID가 높은순
