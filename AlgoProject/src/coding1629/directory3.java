@@ -206,6 +206,8 @@ public class directory3 {
 			while(h!=null) {
 				if ( equal (h.folder , paths[start] ) ) {					
 					find(h , paths , start+1 , exit);
+					
+					//나가는 코드가 없네...
 				}
 				h=h.next;
 			}			
