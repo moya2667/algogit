@@ -27,8 +27,27 @@ public class directory4 {
 		mytree.print(mytree.root, 0);
 		
 		add("/a/a2/a3\0" ,"cc\0");
+		
+		// move 		
+		move("/a/a2\0","/b/b1\0");
+		
+		mytree.print(mytree.root, 0);
 	}
-
+	
+	void move(String p , String c) { 
+		char[] pa_ = new char[MAX];
+		char[] ch_ = new char[MAX];
+		change(p,c, pa_ ,ch_);
+		
+		node o = mytree.find(pa_);
+		node t = mytree.find(ch_);
+		
+		//떼어내고
+		mytree.delete(o.parent , o);
+		
+		//o 를 t chid 로 넣는다
+		t.addchild(o);
+	}
 	
 	void add(String p, String c) {
 		char[] pa_ = new char[MAX];
@@ -102,6 +121,39 @@ public class directory4 {
 			r[0] = '/';
 			r[1] = '\0';
 			root = new node(r);
+		}
+
+		public void delete(node t, node o) {
+			// TODO Auto-generated method stub
+			node h =  t.childhead;
+			while(h!=null) { 
+				if ( equal(h.v, o.v) ) { 
+					if ( h == t.childhead && h == t.childtail) { 
+						t.childhead = null;
+						t.childtail = null;
+						return;
+					}
+					
+					if (h == t.childhead) { 
+						t.childhead = h.next;
+						t.childhead.prev = null; 
+						
+					}else if ( h== t.childtail) { 
+						t.childtail = h.prev ;
+						t.childtail.next = null;
+					}else{ 
+						node pre = h.prev;
+						node ne = h.next; 
+						pre.next = ne;
+						ne.prev = pre;
+					}
+					
+					return;
+					
+				}
+				
+				h = h.next;
+			}
 		}
 
 		public void print(node r, int cnt) {
@@ -180,37 +232,7 @@ public class directory4 {
 			
 		}
 		
-		void myfind____TT_TT(node r , char[][] data , int start , int depth) { 
-			if ( r == null) {
-				return;
-			}
-			
-			if ( start == depth ) {
-				return;
-			}
-			
-			node h = r;
-			while(h!=null) {
-				
-				if ( equal(h.v , data[start])) {
-					int c = start+1;
-					//child 가 존재하고, 끝까지 안갔다면 , child 들어간다 
-					if (h.childhead != null && c != depth) { 
-						myfind(h.childhead , data , c , depth);
-					}
-					
-					if ( c == depth ) {
-						f = h;
-					}
-				}
-				
-				if ( f != null) break;
-				
-				
-				h = h.next;
-			}
-			
-		}
+		
 		
 		boolean equal(char[] o , char[] t) {
 			for (int i = 0; i < t.length; i++) {
