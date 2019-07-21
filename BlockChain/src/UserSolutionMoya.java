@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.Iterator;
 
 class UserSolutionMoya {
 	// Main API :
@@ -38,6 +39,7 @@ class UserSolutionMoya {
 		int tranN = 0 ;
 		transaction[] translist ;
 		int hashkey;
+		int hit =0;
 		
 		//manage child 
 		ll childlist;
@@ -76,20 +78,36 @@ class UserSolutionMoya {
 	public void syncBlockChain(int S, char blockchainimage[][]) {
 	
 		init();
+		//System.out.println("S = " + S);
 		for (int i = 0; i < S; i++) {
 			//block parsing
 			parser( blockchainimage[i] ) ;
 		}
 
+		//등록된 hash 값가져와서 tree 구성 -> root를 가져왔으니, tree 구성가능 
+		Iterator iter = myhash.keySet().iterator();
+		
+		int bias = S/2+1; //BUG
+		while(iter.hasNext()) { //CHNAGE MYHASH->NEXT CNT
+			Object key = iter.next();
+			//System.out.println(Integer.toHexString((int)key));
+			block b = (block)myhash.get(key);
+			if (b.hashpreblock_parent == 0) { 
+				continue;
+			}else if(b.hit >= bias){				
+				block t = (block)myhash.get(b.hashpreblock_parent);
+				t.childlist.addchild(b);
+			}
+		}
+		//print(root,0);
 	}	
-	
-
 	
 	void parser(char[] blockchainimage){
 		
 		int blength= blockchainimage[0]*16777216 + blockchainimage[1]*65536 +  blockchainimage[2]*256 + blockchainimage[3];
-		int pos = 4 ; 
-		while(blength > pos) { 
+		int pos = 4 ;
+		//
+		while(blength > pos) {  //difficult 
 			block b = new block();
 			int len = b.addInfo(blockchainimage ,pos , blength);
 			
@@ -97,25 +115,25 @@ class UserSolutionMoya {
 			b.hashkey = hash;
 			if (b.hashpreblock_parent == 0 ) { 
 				root = b;
-			}
-			//부모 해시 존재하면, child 로 등록 
-			block p = (block)myhash.get(b.hashpreblock_parent);
-			if (p!=null) { 
-				p.childlist.addchild(b); 
+			}				
+				
+			//System.out.println("added hash " + Integer.toHexString(hash)  );
+			block hb = (block)myhash.get(hash);
+			if (hb == null){
+				b.hit++;
+				myhash.put(hash , b);
+			}else{
+				hb.hit++;
 			}
 			
-			System.out.println("hash " + hash);
-			myhash.put(hash , b); 
 			pos = len; 
-		}
+		}		
 	}
 	
-	
 	public int calcAmount(int hash, int exchangeid) {
-		System.out.println("calcAmount hash : " + hash);
-		
+		//System.out.println("calcAmount hash : " + hash);		
 		block b = (block)myhash.get(hash);
-		print(root,0);
+		//print(root,0);
 		total= 0; 
 		gettotal(b, exchangeid); 
 		return total;
@@ -128,8 +146,7 @@ class UserSolutionMoya {
 		int n = b.tranN;
 		for (int i = 0 ; i < n ; i++) { 
 			if ( b.translist[i].exchangedid == exchangeid) {
-				total = total+ b.translist[i].amount;
-				
+				total = total+ b.translist[i].amount;				
 			}
 		}
 		
@@ -146,7 +163,7 @@ class UserSolutionMoya {
 		for (int i = 0 ; i < cnt ; i++) { 
 			System.out.print("+" );
 		}
-		System.out.print(b.hashkey);
+		System.out.print(Integer.toHexString(b.hashkey));
 		System.out.println();
 		
 		block h = b.childlist.head;
@@ -155,8 +172,4 @@ class UserSolutionMoya {
 			h = h.next;
 		}
 	}
-	
-	
-
-
 }

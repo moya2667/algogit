@@ -94,7 +94,7 @@ class UserSolutionMoya {
 			block b = new block();
 			int len = b.addInfo(blockchainimage ,pos , blength);
 			
-			int hash = Solution.calcHash(blockchainimage, pos, len-pos);
+			int hash = blockchain.calcHash(blockchainimage, pos, len-pos);
 			b.hashkey = hash;
 			if (b.hashpreblock_parent == 0 ) { 
 				root = b;
