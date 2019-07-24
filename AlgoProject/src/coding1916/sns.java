@@ -30,6 +30,7 @@ class UserSolution {
 				h = h.next;
 			}
 		}
+
 		void addinsertsort(post p) {
 			int timestamp = p.time;
 			
@@ -50,23 +51,47 @@ class UserSolution {
 					s.prev = t;
 					return;
 				}
+				last = s;
 				s = s.next;
 			}
 			last.next = t;
 			t.prev = last;
 			tail = t;
 		}
-		public void find(int uID, int timestamp) {
+		public void find(user user , int timestamp , ll l , int c ) {
 			time h = tail;
 			while(h!=null) {
 				//클경우, 그 이전 time stamp 값 담기 
 				if (h.timestamp < timestamp && h.timestamp != -1){
 					if (h.p != null){ 
-						System.out.println("담아야한다 : " + h.p.pid + "," + h.p.time );		
+						//user id 에 포함이 되어있는경우 넣는다. 
+						if ( user.uid == h.p.uid ) {
+							System.out.println("담아야한다 : " + h.p.pid + "," + h.p.time );
+							l.add(h.p , timestamp);
+							c++;
+							break;
+						}
+						
+						//followuser에 포함되어 있다면, 
+						followuser f = user.head;
+						while(f!=null) {
+							if ( f.uid == h.p.uid ) { 
+								System.out.println("담아야한다 : " + h.p.pid + "," + h.p.time );
+								l.add(h.p , timestamp);
+								c++;
+								break;
+							}
+							f= f.next;
+						}
+							
 					}
 				}
+				
+				if (c >= 10) break;
 				h = h.prev;
 			}
+			
+			//l.print();
 			
 		}
 	}
@@ -100,7 +125,8 @@ class UserSolution {
 		time prev,next;
 	}
 	
-	class post { 
+	class post {
+		post dprev,dnext;
 		post prev,next;
 		int uid;
 		int like = 0;
@@ -111,6 +137,8 @@ class UserSolution {
 	class user {
 		int time = 0;
 		followuser head,tail;
+		int uid;
+		
 		void addfollow(followuser u) {
 			if (head ==null) {
 				head = u;
@@ -134,7 +162,9 @@ class UserSolution {
 	{
 		for (int i = 1 ; i <= N ; i++) { 
 			users[i] = new user();
+			users[i].uid = i; 
 		}
+		
 		for (int i = 0 ; i <= 1000 ; i++) { 
 			times[i] = new timeregion();
 			posts[i] = new postregion();
@@ -191,6 +221,8 @@ class UserSolution {
 		
 		//신규 TIMESTAMP에 헤딩 PID 넣기.
 		tidx = getregionIdx(timestamp);
+		p.time = timestamp;
+		p.like +=1;
 		times[tidx].addinsertsort(p);
 		
 		System.out.println("like = " + pID + "," +  timestamp);
@@ -206,19 +238,85 @@ class UserSolution {
 		int tidx = getregionIdx(timestamp);
 		
 		
+		//time 에서 data 찾아서 담기 
+		result[] results  = new result[10];
+		ll data = new ll(); 
+		int c = 0 ; 
 		for (int i = tidx ; i > 0 ; i-- ){ 
-			times[i].find(uID, timestamp); 
+			times[i].find(users[uID], timestamp , data , c );
+			if ( c >= 10) break;
 		}
 		
-		/*
-		for(int i = timestamp ; i < 0 ; i--) { 
-			if ( times[timestamp].p == null ) {
-				continue;
-			}
-			// uid 및 uid follow id 가  p 에 존재하는지 확인하고 , 존재하면, insert ll 에 넣는다.
-			// timestamp 가 1000초 미만일경우만. 
-			
+		//담은 data 할당하기 
+		post h = data.head.dnext;
+		int cnt = 0;
+		while(h!=null) { 
+			pIDList[cnt++]= h.pid;
+			h= h.dnext;
 		}
-		*/
+		return;
 	}
+	
+	class result { 
+		result prev,next;
+		int pid;
+	}
+	
+	class ll {
+		result head,tail;
+		
+		ll(){
+			result p = new result();
+			p.pid = -1; 
+			head = p;
+			tail = p;
+		}
+		//우선순위 비교 t 가 timestamp 가 1000초 이내라면,
+		void add(post t , int timestamp) { 
+			result last = head; 
+			result s = head.next; 
+			while(s!=null) { 
+				if (compare(t , s , timestamp)) { 
+					post pre = s.dprev;
+					pre.dnext = t; 
+					t.dprev = pre; 
+					t.dnext = s;
+					s.dprev = t;
+					return;
+				}
+				last = s; 
+				s= s.dnext; 
+			}
+						
+			last.dnext = t;
+			t.dprev = last;
+			tail = t;
+		}
+		
+		void print() {
+			post h = head ;
+			while(h!=null) { 
+				System.out.print( h.pid + " , " );
+				h= h.dnext;
+			}
+			System.out.println();
+		}
+		
+		boolean compare(post t, post s , int time){
+			int diff = time - t.time;
+			if (diff > 1000) { 
+				if ( t.time > s.time) {
+					return true;
+				}
+			}else{ 
+				if ( t.like > s.like) return true;
+				else if ( t.like == s.like){
+					if (t.time > s.time) return true;
+				}
+			}
+			return false;
+		}
+	}
+	
+	
 }
