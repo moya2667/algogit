@@ -1,196 +1,175 @@
+import java.util.ArrayList;
 
-class UserSolution2 {
+class UserSolution3 {
 	
-	
-	int MAX = 100001;
-	time[] times = new time[MAX]; 
-	post[] posts = new post[MAX];
-	
-	user[] users = new user[1001];
-	
-	class time { 
-		int timestamp;
-		post p;
-		time prev,next;
-	}
-	
-	class post {
-		post dprev,dnext;
-		post prev,next;
-		int uid;
-		int like = 0;
-		int time = 0;
-		int pid;
-	}
-	
+	int MAX = 100001;	
+
 	class user {
-		int time = 0;
-		followuser head,tail;
-		post phead,ptail;
-		int uid;
-		
-		void addfollow(followuser u) {
-			if (head ==null) {
-				head = u;
-				tail = u;
-			}else{
-				tail.next = u;
-				u.prev = tail;
-				tail = u;
-			}
+		int fc;
+		int[] follow;
+		ArrayList<Integer> postlist; 
+		user (int n) {
+			fc = 0 ;
+			follow = new int[n];
+			postlist = new ArrayList<Integer>();
 		}
-
-		public void addpost(post p) {
-			if (phead ==null) {
-				phead = p;
-				ptail = p;
-			}else{
-				ptail.next = p;
-				p.prev = ptail;
-				ptail = p;
-			}
-			
+		void addfollow(int uID2) {
+			follow[fc++] = uID2;
+		}
+		void addpost(int pID) {
+			postlist.add(pID);
 		}
 	}
 	
-	class followuser{
-		followuser prev,next;
+	class post { 
 		int uid;
-		int time;		
+		int pid;
+		int timestamp;
+		int like = 0;
 	}
-
+	
+	user[] users = null;
+	post[] posts = new post[MAX];
 	
 	public void init(int N)
 	{
-		for (int i = 1 ; i <= N ; i++) { 
-			users[i] = new user();
-			users[i].uid = i; 
+		users = new user[N+1];
+		for (int i = 1; i <= N; i++) {
+			users[i] = new user(N);
 		}
 		
-		for (int i = 0 ; i < MAX ; i++) { 
-			times[i] = new time();
+		for (int i = 0; i < MAX; i++) {
 			posts[i] = new post();
 		}
-		System.out.println("init = " + N);
 	}
 
 	public void follow(int uID1, int uID2, int timestamp)
 	{	
-		followuser f = new followuser(); 
-		f.uid = uID2; 
-		f.time = timestamp; 
-		
-		users[uID1].addfollow(f);
-		System.out.println("follow = " + uID1 + "," + uID2 +"," + timestamp);
+		users[uID1].addfollow(uID2);
 	}
 
 	public void makePost(int uID, int pID, int timestamp)
 	{
-		System.out.println("makePost = " + uID + "," + pID +"," + timestamp);
-		
-		posts[pID].time = timestamp;
 		posts[pID].uid = uID;
 		posts[pID].pid = pID;
-		
-		users[uID].addpost(posts[pID]); 
+		posts[pID].timestamp = timestamp;
+		users[uID].addpost(pID);
 	}
 
 
 	public void like(int pID, int timestamp)
-	{
-		posts[pID].like += 1; 
-		posts[pID].time = timestamp;
-		System.out.println("like = " + pID + "," +  timestamp);
-	}
-
-	public void getFeed(int uID, int timestamp, int pIDList[])
 	{	
-		System.out.println("getFeed = " + uID +  "," + timestamp + "," + pIDList[0]) ;
+		posts[pID].like += 1;
+	}
 
-		//uID
-		post t = users[uID].ptail;
-		while(t!=null) {
-			if ( t.time < timestamp ) { 
-				addCandi(t);
-			}
-			t = t.prev;
+	
+	ll result = null;
+	public void getFeed(int uID, int timestamp, int pIDList[])
+	{
+		result = new ll();
+		addcandi(users[uID],timestamp);
+		
+		for (int i = 0; i < users[uID].fc ; i++) {
+			int fwid = users[uID].follow[i];
+			addcandi(users[fwid],timestamp);
 		}
 		
-		followuser f = users[uID].head;
-		
-		while(f!=null) {
-			post p = users[f.uid].ptail ;
-			while(p != null) {
-				if ( p.time < timestamp ) { 
-					addCandi(t);
-				}
-				p = p.prev;
-			}
-			f = f.next; 
+		result h = result.head.next;
+		int c = 0;
+		while(h!=null) {
+			if ( c == 10) break;
+			pIDList[c++] = h.id;
+			h = h.next; 
 		}
-		
-		return;
 	}
 	
-	void addCandi(post p) { 
-		
+	void addcandi(user u ,int timestamp) { 
+		int cnt = u.postlist.size();
+		for (int i = 0; i < cnt; i++) {
+			int postid = u.postlist.get(i);
+			result.add(posts[postid],timestamp);
+			result.print();
+		}
 	}
 	
-	class ll {
-		post head,tail;
+	class result{
+		int id ; 
+		result prev, next;
+	}
+	class ll { 
+		result head,tail;
+		int c  = 0 ;
 		
-		ll(){
-			post p = new post();
-			p.pid = -1; 
-			head = p;
-			tail = p;
-		}
-		//우선순위 비교 t 가 timestamp 가 1000초 이내라면,
-		void add(post t , int timestamp) { 
-			post last = head; 
-			post s = head.dnext; 
-			while(s!=null) { 
-				if (compare(t , s , timestamp)) { 
-					post pre = s.dprev;
-					pre.dnext = t; 
-					t.dprev = pre; 
-					t.dnext = s;
-					s.dprev = t;
-					return;
-				}
-				last = s; 
-				s= s.dnext; 
-			}
-						
-			last.dnext = t;
-			t.dprev = last;
-			tail = t;
+		ll () {
+			result r = new result();
+			r.id = -1; 
+			head = r; tail = r;
 		}
 		
-		void print() {
-			post h = head ;
-			while(h!=null) { 
-				System.out.print( h.pid + " , " );
-				h= h.dnext;
+		public void print() {
+			// TODO Auto-generated method stub
+			result h = head.next;
+			while(h!=null) {
+				System.out.print(h.id + ",");
+				h = h.next; 
 			}
 			System.out.println();
 		}
-		
-		boolean compare(post t, post s , int time){
-			int diff = time - t.time;
-			if (diff > 1000) { 
-				if ( t.time > s.time) {
-					return true;
+
+		void add(post p , int time) { 
+			result r = new result();
+			r.id = p.pid; 
+			int cnt = 0 ; 
+			
+			result last = head; 
+			result start = head.next;
+			
+			//while(start!=null && cnt < 10) {
+			for (int i = 0 ; i < 9 ; i++ ) { //이게 말이 안됨 
+				if (start == null) break; 
+				//p를 바꾸려면 조건 처리 
+				if (compare( p , posts[start.id] , time)){ 
+					result pre = start.prev;
+					pre.next = r ;
+					r.prev = pre;
+					
+					r.next = start;
+					start.prev = r;
+					cnt++;
+					return;
 				}
-			}else{ 
-				if ( t.like > s.like) return true;
-				else if ( t.like == s.like){
-					if (t.time > s.time) return true;
+				last = start;
+				start = start.next;
+				cnt++;
+			}
+			
+			last.next = r ;
+			r.prev = last; 
+			tail = last;	
+			c++;
+		}
+
+		//p 가 1000초 이내라면,
+		boolean compare(post p, post t , int time) {
+			// TODO Auto-generated method stub
+			int ptime = time - p.timestamp;
+			int ttime = time - t.timestamp;
+			
+			if (ptime < 1000) {
+				if (ttime > 1000) return true;
+				if (p.like > t.like) return true;
+				else if (p.like == t.like ) { 
+					if (p.timestamp >t.timestamp) {
+						return true;
+					}
+				}
+			}else if (ptime > 1000 && ttime > 1000){ 
+				if (p.timestamp > t.timestamp) {
+					return true;
 				}
 			}
 			return false;
 		}
+		
 	}
-	
-	
 }
