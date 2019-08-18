@@ -66,10 +66,10 @@ public class UserSolution2 {
 		{
 			int h = hash(key);
 			
-			//collision ÀÌ ¹ß»ıÇÏ¸é, ¾î¶»°Ô ´Ù·ê°ÍÀÎÁö 
+			//collision ì´ ë°œìƒí•˜ë©´, ì–´ë–»ê²Œ ë‹¤ë£°ê²ƒì¸ì§€ 
 			while(tb[h].key != null)
 			{	
-				//±âÁ¸Å°¿¡ Ãß°¡ Á¤º¸ ³Ö±â À§ÇØ¼­..int[] ¹è¿­ ³Ö±â À§ÇØ¼­..
+				//ê¸°ì¡´í‚¤ì— ì¶”ê°€ ì •ë³´ ë„£ê¸° ìœ„í•´ì„œ..int[] ë°°ì—´ ë„£ê¸° ìœ„í•´ì„œ..
 				if (tb[h].delete == false && tb[h].key.equals(key)){
 					tb[h].data[ tb[h].dc++ ] = cnt;
 					return true;
@@ -77,7 +77,7 @@ public class UserSolution2 {
 				h = (h + 1) % capacity;
 			}
 			
-			//°á±¹ ¾Æ·¡¿¡ ½Å±Ô Å°¸¦ ³Ö´Â´Ù
+			//ê²°êµ­ ì•„ë˜ì— ì‹ ê·œ í‚¤ë¥¼ ë„£ëŠ”ë‹¤
 			tb[h].key = key;
 			tb[h].data[ tb[h].dc++ ] = cnt;
 			return true;
@@ -141,7 +141,7 @@ public class UserSolution2 {
 			return 0;
 		}
 		
-		//delete flag ·Î º¯°æÇØ³õ´Â´Ù.
+		//delete flag ë¡œ ë³€ê²½í•´ë†“ëŠ”ë‹¤.
 		int c = 0;
 		for (int i = 0; i < h.dc; i++) {
 			if ( records[h.data[i]].isdelete == false) { 
@@ -150,13 +150,13 @@ public class UserSolution2 {
 			}
 		}
 		
-		//key »èÁ¦ ? ³ª¸ÓÁö´Â ? 
+		//key ì‚­ì œ ? ë‚˜ë¨¸ì§€ëŠ” ? 
 		tables[field].delete(str);
 		
 		return c;
 	}
 
-	//field ÀÇ str(Å°)¿¡ ÇØ´çÇÏ´Â records µéÀ» Ã£°í, Ã£Àº records µé¿¡ Æ¯Á¤ field ÀÇ °ªÀ» ¹Ù²Û´Ù.
+	//field ì˜ str(í‚¤)ì— í•´ë‹¹í•˜ëŠ” records ë“¤ì„ ì°¾ê³ , ì°¾ì€ records ë“¤ì— íŠ¹ì • field ì˜ ê°’ì„ ë°”ê¾¼ë‹¤.
 	int Change(int field, String str, int changefield, String changestr)
 	{
 		System.out.println("CHANGE " + str  +" , " + changestr);
@@ -167,7 +167,7 @@ public class UserSolution2 {
 			System.out.println("Change Not found Key");
 			return 0;
 		}
-		//°ªº¯°æ ÇÏ°í , º¯°æµÈ °ªÀ» ±âÁ¸ hash¿¡¼­ Áö¿ì°í, ½Å±Ô hash¿¡ ´Ù½Ã ³Ö´Â´Ù. 
+		//ê°’ë³€ê²½ í•˜ê³  , ë³€ê²½ëœ ê°’ì„ ê¸°ì¡´ hashì—ì„œ ì§€ìš°ê³ , ì‹ ê·œ hashì— ë‹¤ì‹œ ë„£ëŠ”ë‹¤. 
 		int c = 0;
 		for (int i = 0; i < h.dc; i++) {
 			if ( records[h.data[i]].isdelete == false) {
@@ -175,7 +175,7 @@ public class UserSolution2 {
 				//delete hash
 				tables[changefield].delete(str);
 				
-				//°ª º¯°æ
+				//ê°’ ë³€ê²½
 				if (changefield == 0) { 
 					records[h.data[i]].name = changestr;
 					tables[0].add(changestr, h.data[i]);
@@ -223,7 +223,7 @@ public class UserSolution2 {
 		for (int i = 0; i < size; i++) {
 			if ( records[h.data[i]].isdelete != true ) {
 				System.out.println(records[h.data[i]].name);
-				//°ª º¯°æ
+				//ê°’ ë³€ê²½
 				if (returnfield == 0) { 
 					result.str = records[h.data[i]].name;				
 				}else if (returnfield == 1) { 
@@ -248,7 +248,7 @@ public class UserSolution2 {
 		/*
 		if ( h.dc == 1 ) { 
 			result.count = 1;
-			//°ª º¯°æ
+			//ê°’ ë³€ê²½
 			if (returnfield == 0) { 
 				result.str = records[h.data[0]].name;				
 			}else if (returnfield == 1) { 
