@@ -1,0 +1,134 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+
+
+class UserSolution2 {
+	
+	class SubjectTitle { 
+		String s ; 
+		SubjectTitle prev,next;
+		boolean delete = false;
+	}
+	
+	int MAX = 300;
+	//Parameters
+	//N : 메일 서버 이용자의 수
+	//K : 받은 메일함에 저장할 수 있는 메일의 개수
+	class User{
+		int uid;
+		int mailcnt = 0 ; 
+		SubjectTitle[] titles;
+	}
+	
+	User[] users ; 
+	int MAXK,MAXN ; 
+	HashMap<String , ArrayList<Integer>> subjectHash ;
+	HashMap<String , ArrayList<Integer>> textHash;
+	
+	public void init(int N, int K) {
+		MAXK = K; 
+		MAXN = N; 
+		users = new User[N];		
+		for (int i = 0; i < N; i++) {
+			users[i] = new User(); 
+		}
+		subjectHash = new HashMap();
+		textHash = new HashMap();
+	}
+
+	public void sendMail(char[] subject, int uID, int cnt, int[] rIDs) {
+		
+		char[] text = new char[12];
+		char[] mytempSubject = new char[200];
+		int mysubjectlen = 0 ;
+		int textlen = 0; 
+		
+		
+		for (int i = 0 ; i < subject.length ; i++) {
+			char ch = subject[i];
+			if (ch =='\0') {
+				char[] mysub = new char[mysubjectlen];
+				String sSubject = new String(mysub);
+				ArrayList<Integer> list = subjectHash.get(sSubject);
+				if (list == null) {
+					list = new ArrayList<Integer>();
+				}
+				
+				for (int j=0 ; j< cnt;j++) { 
+					list.add(rIDs[j]);
+					users[rIDs[j]].mailcnt++; //사용자별 메일갯수 
+				}
+				subjectHash.put(sSubject, list);
+			}
+			else if (ch == ' ') {
+				char[] mytext = new char[textlen];
+				String sText= new String(mytext);
+				ArrayList<Integer> list = textHash.get(sText);
+				if (list == null) {
+					list = new ArrayList<Integer>();
+				}
+				
+				//이미 존재안하면, 넣는다. (TEXT별 하나) 
+				for (int j=0 ; j< cnt;j++) {
+					if ( !list.contains(rIDs[j])){
+						list.add(rIDs[j]);
+					}
+				}
+									
+				textHash.put(sText, list); 
+				//초기화 
+				text = new char[10];
+				textlen = 0 ; 
+				
+			}else {
+				mytempSubject[mysubjectlen++] = subject[i];
+				text[textlen++] = subject[i];
+			}	
+		}
+		
+	}
+
+	public int getCount(int uID) {		
+		return users[uID].mailcnt;
+	}
+
+	public int deleteMail(int uID, char[] subject) {
+		char[] t = new char[201];
+		int cnt = 0 ; 
+		for (int i =0 ; i < 201 ; i++) { 
+			if ( subject[i] =='\0' ) { 
+				break;
+			}else {
+				t[cnt++] = subject[i];
+			}
+		}
+		
+		return users[uID].deletemail(t);		
+	}
+
+	public int searchMail(int uID, char[] text) {
+		
+		char[] t = new char[12];
+		int cnt = 0 ; 
+		for (int i =0 ; i < 10 ; i++) { 
+			if ( text[i] =='\0' ) {
+				char[] mytext = new char[cnt];
+				ArrayList<Integer> idlist = textHash.get(mytext);
+				if (idlist == null) return 0; 
+				int len = idlist.size();
+				for (int j = 0; j < len ; j++) {
+					int id = idlist[j];
+					if (id == uID) { 
+						
+					}
+					
+				}
+				
+				break;
+			}else {
+				t[cnt++] = text[i];
+			}
+		}
+		return users[uID].search(t);
+	}
+}
