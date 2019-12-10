@@ -1,134 +1,232 @@
-import java.util.ArrayList;
-import java.util.HashMap;
+class UserSolution {
 
-
-class UserSolution2 {
-	
-	class SubjectTitle { 
-		String s ; 
-		SubjectTitle prev,next;
+	class SubjectTitle {
+		//String sub = new String();
+		SubjectTitle prev, next;
 		boolean delete = false;
+		long[] textlong = new long[10];
 	}
-	
-	int MAX = 300;
-	//Parameters
-	//N : 메일 서버 이용자의 수
-	//K : 받은 메일함에 저장할 수 있는 메일의 개수
-	class User{
-		int uid;
-		int mailcnt = 0 ; 
-		SubjectTitle[] titles;
-	}
-	
-	User[] users ; 
-	int MAXK,MAXN ; 
-	HashMap<String , ArrayList<Integer>> subjectHash ;
-	HashMap<String , ArrayList<Integer>> textHash;
-	
-	public void init(int N, int K) {
-		MAXK = K; 
-		MAXN = N; 
-		users = new User[N];		
-		for (int i = 0; i < N; i++) {
-			users[i] = new User(); 
+
+	class ll {
+		SubjectTitle head, tail;
+
+		public void add(SubjectTitle n) {
+			if (head == null) {
+				head = new SubjectTitle();
+				tail = new SubjectTitle();
+				head.next = n;
+				n.prev = head;
+				n.next = tail;
+				tail.prev = n;
+			} else {
+				SubjectTitle pre = tail.prev;
+				pre.next = n;
+				n.prev = pre;
+
+				n.next = tail;
+				tail.prev = n;
+			}
 		}
-		subjectHash = new HashMap();
-		textHash = new HashMap();
+
+		public void deletehead(SubjectTitle title) {
+			SubjectTitle h = head.next;
+			SubjectTitle pre = h.prev;
+			SubjectTitle ne = h.next;
+
+			pre.next = ne;
+			ne.prev = pre;
+		}
+
+		public void delete(SubjectTitle title) {
+			SubjectTitle pre = title.prev;
+			SubjectTitle ne = title.next;
+			pre.next = ne;
+			ne.prev = pre;			
+		}
+	}
+	
+
+	// Parameters
+	// N : 메일 서버 이용자의 수
+	// K : 받은 메일함에 저장할 수 있는 메일의 개수
+	class User {
+		int uid;
+		int mailC = 0;
+		ll myll;
+
+		User(int uid) {
+			this.uid = uid;
+			myll = new ll();
+		}
+
+		public void addmail(char[] mySubject, long[] textlongs) {
+			SubjectTitle title = new SubjectTitle();
+			//title.sub = new String(mySubject);			
+			title.textlong = textlongs;
+
+			if (mailC < MAXK) {
+				myll.add(title);				
+				mailC++;
+			} else {
+				myll.deletehead(title);
+				myll.add(title);
+			}
+		}
+
+
+		public int deleteLongMail(long[] longtexts) {
+			SubjectTitle h = myll.head;
+			int cnt = 0;
+			
+			while (h != null) {
+				boolean ismatch = true;
+				for (int i = 0; i < 10; i++) {
+					if (h.textlong[i] == 0 && longtexts[i] == 0)
+						break;
+					if (h.textlong[i] != longtexts[i]) {
+						ismatch = false;
+						break;
+					}
+				}
+
+				if (ismatch != false) {
+					cnt++;
+					myll.delete(h);
+				}
+
+				h = h.next;
+			}
+
+			mailC = mailC - cnt;
+			return cnt;
+		}
+
+		// 각 메일 리스트에 제목이 l 이 포함되어 있는것을 cnt
+		public int searchText(long l) {
+			SubjectTitle h = myll.head.next;
+			int cnt = 0;
+			while (h != null && h != myll.tail) {
+
+				for (int i = 0; i < 10; i++) {
+					if (h.textlong[i] == l) {
+						cnt++;
+						break;
+					}
+				}
+
+				h = h.next;
+			}
+			return cnt;
+		}
+
+	}
+
+	User[] users;
+	int MAXK, MAXN;
+
+	public void init(int N, int K) {
+		MAXK = K;
+		MAXN = N;
+		users = new User[N];
+		for (int i = 0; i < N; i++) {
+			users[i] = new User(i);
+		}
 	}
 
 	public void sendMail(char[] subject, int uID, int cnt, int[] rIDs) {
-		
-		char[] text = new char[12];
-		char[] mytempSubject = new char[200];
-		int mysubjectlen = 0 ;
-		int textlen = 0; 
-		
-		
-		for (int i = 0 ; i < subject.length ; i++) {
+		int len = subject.length;
+		long[] textlongArray = new long[10];
+		char[] mySubject = new char[len];
+		char[] mytext = new char[10];
+		int mysubjectlen = 0;
+		int textlen = 0;
+		int textc = 0;
+
+		for (int i = 0; i < len; i++) {
 			char ch = subject[i];
-			if (ch =='\0') {
-				char[] mysub = new char[mysubjectlen];
-				String sSubject = new String(mysub);
-				ArrayList<Integer> list = subjectHash.get(sSubject);
-				if (list == null) {
-					list = new ArrayList<Integer>();
+			if (ch == '\0' || ch == ' ') {
+				long text2Long = charArrayToLong(mytext, textlen);
+				textlongArray[textc++] = text2Long;
+
+				if (ch == '\0') {
+					break;
 				}
-				
-				for (int j=0 ; j< cnt;j++) { 
-					list.add(rIDs[j]);
-					users[rIDs[j]].mailcnt++; //사용자별 메일갯수 
-				}
-				subjectHash.put(sSubject, list);
+
+				// 초기화
+				textlen = 0;
+				mytext = new char[10];
+
+			} else {
+				mySubject[mysubjectlen++] = subject[i];
+				mytext[textlen++] = subject[i];
 			}
-			else if (ch == ' ') {
-				char[] mytext = new char[textlen];
-				String sText= new String(mytext);
-				ArrayList<Integer> list = textHash.get(sText);
-				if (list == null) {
-					list = new ArrayList<Integer>();
-				}
-				
-				//이미 존재안하면, 넣는다. (TEXT별 하나) 
-				for (int j=0 ; j< cnt;j++) {
-					if ( !list.contains(rIDs[j])){
-						list.add(rIDs[j]);
-					}
-				}
-									
-				textHash.put(sText, list); 
-				//초기화 
-				text = new char[10];
-				textlen = 0 ; 
-				
-			}else {
-				mytempSubject[mysubjectlen++] = subject[i];
-				text[textlen++] = subject[i];
-			}	
 		}
-		
+
+		for (int i = 0; i < cnt; i++) {
+			users[rIDs[i]].addmail(mySubject, textlongArray);
+		}
+
 	}
 
-	public int getCount(int uID) {		
-		return users[uID].mailcnt;
+	public long charArrayToLong(char[] text, int textLength) {
+		long result = 0;
+
+		for (int i = 0; i < textLength; i++) {
+			result += text[i] - 'a' + 1;
+			result = result << 5;
+		}
+		return result;
+	}
+
+	public int getCount(int uID) {
+		return users[uID].mailC;
 	}
 
 	public int deleteMail(int uID, char[] subject) {
-		char[] t = new char[201];
-		int cnt = 0 ; 
-		for (int i =0 ; i < 201 ; i++) { 
-			if ( subject[i] =='\0' ) { 
-				break;
-			}else {
-				t[cnt++] = subject[i];
+		int len = subject.length;
+		long[] textlongArray = new long[10];
+		char[] mySubject = new char[len];
+		char[] mytext = new char[10];
+		int mysubjectlen = 0;
+		int textlen = 0;
+		int textc = 0;
+
+		for (int i = 0; i < len; i++) {
+			char ch = subject[i];
+			if (ch == '\0' || ch == ' ') {
+				long text2Long = charArrayToLong(mytext, textlen);
+				textlongArray[textc++] = text2Long;
+
+				if (ch == '\0') {
+					break;
+				}
+				// 초기화
+				textlen = 0;
+				mytext = new char[10];
+
+			} else {
+				mySubject[mysubjectlen++] = subject[i];
+				mytext[textlen++] = subject[i];
 			}
 		}
-		
-		return users[uID].deletemail(t);		
+
+		return users[uID].deleteLongMail(textlongArray);
 	}
 
 	public int searchMail(int uID, char[] text) {
-		
-		char[] t = new char[12];
-		int cnt = 0 ; 
-		for (int i =0 ; i < 10 ; i++) { 
-			if ( text[i] =='\0' ) {
-				char[] mytext = new char[cnt];
-				ArrayList<Integer> idlist = textHash.get(mytext);
-				if (idlist == null) return 0; 
-				int len = idlist.size();
-				for (int j = 0; j < len ; j++) {
-					int id = idlist[j];
-					if (id == uID) { 
-						
-					}
-					
-				}
-				
+		long[] textlongArray = new long[1];
+		int textlen = 0;
+		int len = text.length;
+		for (int i = 0; i < len; i++) {
+			char ch = text[i];
+			if (ch == '\0') {
+				textlongArray[0] = charArrayToLong(text, textlen);
 				break;
-			}else {
-				t[cnt++] = text[i];
 			}
+			textlen++;
 		}
-		return users[uID].search(t);
+
+		return users[uID].searchText(textlongArray[0]);
+
 	}
 }
