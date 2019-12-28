@@ -51,21 +51,21 @@ public class UserSolution3 {
 	}	
 
 	/*
-	 * string_A : ±ÔÄ¢À» ÀÌ·ç´Â ¹®ÀÚ¿­¿¡¼­ Ã£¾Æ º¯È¯½ÃÅ³ ¹®ÀÚ¿­ÀÌ´Ù. string_B : string_A ¸¦ ´ëÃ¼ÇÒ ¹®ÀÚ¿­
-	 * (string_A, string_B) ÀÇ °¢ ±æÀÌ´Â 3ÀÌ´Ù.
+	 * string_A : ê·œì¹™ì„ ì´ë£¨ëŠ” ë¬¸ìì—´ì—ì„œ ì°¾ì•„ ë³€í™˜ì‹œí‚¬ ë¬¸ìì—´ì´ë‹¤. string_B : string_A ë¥¼ ëŒ€ì²´í•  ë¬¸ìì—´
+	 * (string_A, string_B) ì˜ ê° ê¸¸ì´ëŠ” 3ì´ë‹¤.
 	 */
 	int change(char string_A[], char string_B[]) {
 		int ret = 0 ;
-		//1. string AÀÇ  key¿¡ ´ëÇÑ idx Á¤º¸ °Ë»ö ,
-		//2. °Ë»öµÈ idx ±â¹İÀ¸·Î, -2~2±îÁö ¿µÇâÀ» ³¢Ä¡´Â key ¸¦ Á¦°Å 
-		//3. mystr Á¤º¸ ¾÷µ¥ÀÌÆ®
-		//4. mystr ±â¹İÀ¸·Î, -2~2 posÀ§Ä¡¿¡ ÀÖ´Â key ¸¦ Ãß°¡ 
+		//1. string Aì˜  keyì— ëŒ€í•œ idx ì •ë³´ ê²€ìƒ‰ ,
+		//2. ê²€ìƒ‰ëœ idx ê¸°ë°˜ìœ¼ë¡œ, -2~2ê¹Œì§€ ì˜í–¥ì„ ë¼ì¹˜ëŠ” key ë¥¼ ì œê±° 
+		//3. mystr ì •ë³´ ì—…ë°ì´íŠ¸
+		//4. mystr ê¸°ë°˜ìœ¼ë¡œ, -2~2 posìœ„ì¹˜ì— ìˆëŠ” key ë¥¼ ì¶”ê°€ 
 		Hash strAKey = gethash(string_A[0],string_A[1],string_A[2]);		
 		if (strAKey == null) return 0;
 		
-		//1. string AÀÇ  key¿¡ ´ëÇÑ idx Á¤º¸ °Ë»ö ,
+		//1. string Aì˜  keyì— ëŒ€í•œ idx ì •ë³´ ê²€ìƒ‰ ,
 		ll strAll = strAKey.getidxlist();		
-		int prev = -1; //ÀÌÀü position °ª
+		int prev = -1; //ì´ì „ position ê°’
 		Position s = strAll.head.next;
 		
 		while(s.pos != -1) {			
@@ -77,18 +77,18 @@ public class UserSolution3 {
 				}
 			}
 			
-			//2. °Ë»öµÈ idx ±â¹İÀ¸·Î, -2~2±îÁö ¿µÇâÀ» ³¢Ä¡´Â key ¸¦ Á¦°Å 	
-			s = s.next; //¹Ì¸® ³Ñ°Ü³õÀ½
+			//2. ê²€ìƒ‰ëœ idx ê¸°ë°˜ìœ¼ë¡œ, -2~2ê¹Œì§€ ì˜í–¥ì„ ë¼ì¹˜ëŠ” key ë¥¼ ì œê±° 	
+			s = s.next; //ë¯¸ë¦¬ ë„˜ê²¨ë†“ìŒ
 			deleteHash(pos);
 			
 			prev = pos;
 			
-			//3. mystr Á¤º¸ ¾÷µ¥ÀÌÆ®
+			//3. mystr ì •ë³´ ì—…ë°ì´íŠ¸
 			mystr[pos] = string_B[0];
 			mystr[pos+1] = string_B[1];
 			mystr[pos+2] = string_B[2];
 			
-			//4. mystr ±âÁØÀ¸·Î, -2~2 posÀ§Ä¡¿¡ ÀÖ´Â key ¸¦ Ãß°¡ 
+			//4. mystr ê¸°ì¤€ìœ¼ë¡œ, -2~2 posìœ„ì¹˜ì— ìˆëŠ” key ë¥¼ ì¶”ê°€ 
 			updateHash(pos);
 			ret++;
 		}
@@ -108,12 +108,12 @@ public class UserSolution3 {
 		
 	}
 	void deleteHash(int pos) {
-		//2. °Ë»öµÈ idx ±â¹İÀ¸·Î, mystrÀÇ -2~2±îÁö ¿µÇâÀ» ³¢Ä¡´Â key ¸¦ Á¦°Å
+		//2. ê²€ìƒ‰ëœ idx ê¸°ë°˜ìœ¼ë¡œ, mystrì˜ -2~2ê¹Œì§€ ì˜í–¥ì„ ë¼ì¹˜ëŠ” key ë¥¼ ì œê±°
 		int min = pos-2;
 		int max = pos+2;
 		for (int i = min; i < max+1; i++) {
 			if (i < 0 || i >= MAXN-2 ) continue;
-			/* ll ÅëÇØ , Á¢±ÙÇÏ´Â ¹æ¹ı 
+			/* ll í†µí•´ , ì ‘ê·¼í•˜ëŠ” ë°©ë²• 
 			Hash h = gethash(mystr[i], mystr[i+1], mystr[i+2]);
 			Position f = h.myidxlist.find(i);
 			h.myidxlist.delete(positions[i]);
@@ -121,7 +121,7 @@ public class UserSolution3 {
 			h.myidxlist.delete(f);
 			*/		
 			
-			// ll¾Æ´Ñ ¹Ù·Î Á¢±ÙÇÏ´Â¹æ¹ı 
+			// llì•„ë‹Œ ë°”ë¡œ ì ‘ê·¼í•˜ëŠ”ë°©ë²• 
 			deleteHash(positions[i]);
 		}
 	}
@@ -171,7 +171,7 @@ public class UserSolution3 {
 		void addsort(int idx) {
 			Position n = new Position(idx);
 			
-			positions[idx] = n; //ÀÌ·¸°Ô ´ã¾Æ³õÀ¸¸é 0.3 opti
+			positions[idx] = n; //ì´ë ‡ê²Œ ë‹´ì•„ë†“ìœ¼ë©´ 0.3 opti
 			
 			if (head == null) {
 				Position s = new Position(-1);
