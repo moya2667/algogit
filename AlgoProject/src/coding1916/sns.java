@@ -1,175 +1,222 @@
-import java.util.ArrayList;
+class UserSolution7 {
+    
+    int MAX = 100001;   
 
-class UserSolution3 {
-	
-	int MAX = 100001;	
+    class user {
+        int fc;
+        int[] follow;
+        //ArrayList<Integer> postlist;
+        postlist postlist = new postlist();
+        user(int n) {
+            fc = 0 ;
+            follow = new int[n];
+            postlist = new postlist();
+        }
+        void addfollow(int uID2) {
+            follow[fc++] = uID2;
+        }        
+        void addpost(post p) {
+            postlist.add(p);
+        }
+    }
+    
+    class postlist {
+        post head,tail;
+        void add(post p) {
+            if (head == null) {
+                head = p;    
+                tail = p;
+            }else{
+                tail.next = p;
+                p.prev = tail;
+                tail = p;
+            }    
+        }
+    }
+    class post { 
+        post prev,next;
+        int uid;
+        int pid;
+        int timestamp;
+        int like = 0;
+    }
+    
+    user[] users = null;
+    post[] posts ;    
+    int userN;
+    public void init(int N)
+    {
+        userN =  N ;
+        users = new user[N+1];
+        posts = new post[MAX+1];
+        for (int i = 0; i < N+1; i++) {
+            //post post = posts[i];
+            users[i]= new user(userN);            
+        }
+        //init        
+        for (int i = 0; i < MAX+1; i++) {
+            //post post = posts[i];
+            posts[i] = new post();
+        }
+        
+        heap = new post[MAX];
+        heapSize = 0;
+    }
 
-	class user {
-		int fc;
-		int[] follow;
-		ArrayList<Integer> postlist; 
-		user (int n) {
-			fc = 0 ;
-			follow = new int[n];
-			postlist = new ArrayList<Integer>();
-		}
-		void addfollow(int uID2) {
-			follow[fc++] = uID2;
-		}
-		void addpost(int pID) {
-			postlist.add(pID);
-		}
-	}
-	
-	class post { 
-		int uid;
-		int pid;
-		int timestamp;
-		int like = 0;
-	}
-	
-	user[] users = null;
-	post[] posts = new post[MAX];
-	
-	public void init(int N)
-	{
-		users = new user[N+1];
-		for (int i = 1; i <= N; i++) {
-			users[i] = new user(N);
-		}
-		
-		for (int i = 0; i < MAX; i++) {
-			posts[i] = new post();
-		}
-	}
+    public void follow(int uID1, int uID2, int timestamp)
+    {   
+        users[uID1].addfollow(uID2);
+    }
 
-	public void follow(int uID1, int uID2, int timestamp)
-	{	
-		users[uID1].addfollow(uID2);
-	}
+    public void makePost(int uID, int pID, int timestamp)
+    {   
+        posts[pID].uid = uID;
+        posts[pID].pid = pID;
+        posts[pID].timestamp = timestamp;
+        users[uID].addpost(posts[pID]);
+    }
 
-	public void makePost(int uID, int pID, int timestamp)
-	{
-		posts[pID].uid = uID;
-		posts[pID].pid = pID;
-		posts[pID].timestamp = timestamp;
-		users[uID].addpost(pID);
-	}
-
-
-	public void like(int pID, int timestamp)
-	{	
-		posts[pID].like += 1;
-	}
-
-	
-	ll result = null;
-	public void getFeed(int uID, int timestamp, int pIDList[])
-	{
-		result = new ll();
-		addcandi(users[uID],timestamp);
-		
-		for (int i = 0; i < users[uID].fc ; i++) {
-			int fwid = users[uID].follow[i];
-			addcandi(users[fwid],timestamp);
-		}
-		
-		result h = result.head.next;
-		int c = 0;
-		while(h!=null) {
-			if ( c == 10) break;
-			pIDList[c++] = h.id;
-			h = h.next; 
-		}
-	}
-	
-	void addcandi(user u ,int timestamp) { 
-		int cnt = u.postlist.size();
-		for (int i = 0; i < cnt; i++) {
-			int postid = u.postlist.get(i);
-			result.add(posts[postid],timestamp);
-			result.print();
-		}
-	}
-	
-	class result{
-		int id ; 
-		result prev, next;
-	}
-	class ll { 
-		result head,tail;
-		int c  = 0 ;
-		
-		ll () {
-			result r = new result();
-			r.id = -1; 
-			head = r; tail = r;
-		}
-		
-		public void print() {
-			// TODO Auto-generated method stub
-			result h = head.next;
-			while(h!=null) {
-				System.out.print(h.id + ",");
-				h = h.next; 
-			}
-			System.out.println();
-		}
-
-		void add(post p , int time) { 
-			result r = new result();
-			r.id = p.pid; 
-			int cnt = 0 ; 
-			
-			result last = head; 
-			result start = head.next;
-			
-			//while(start!=null && cnt < 10) {
-			for (int i = 0 ; i < 9 ; i++ ) { //이게 말이 안됨 
-				if (start == null) break; 
-				//p를 바꾸려면 조건 처리 
-				if (compare( p , posts[start.id] , time)){ 
-					result pre = start.prev;
-					pre.next = r ;
-					r.prev = pre;
-					
-					r.next = start;
-					start.prev = r;
-					cnt++;
-					return;
-				}
-				last = start;
-				start = start.next;
-				cnt++;
-			}
-			
-			last.next = r ;
-			r.prev = last; 
-			tail = last;	
-			c++;
-		}
-
-		//p 가 1000초 이내라면,
-		boolean compare(post p, post t , int time) {
-			// TODO Auto-generated method stub
-			int ptime = time - p.timestamp;
-			int ttime = time - t.timestamp;
-			
-			if (ptime < 1000) {
-				if (ttime > 1000) return true;
-				if (p.like > t.like) return true;
-				else if (p.like == t.like ) { 
-					if (p.timestamp >t.timestamp) {
-						return true;
-					}
-				}
-			}else if (ptime > 1000 && ttime > 1000){ 
-				if (p.timestamp > t.timestamp) {
-					return true;
-				}
-			}
-			return false;
-		}
-		
-	}
+    public void like(int pID, int timestamp)
+    {   
+        posts[pID].like += 1;
+    }    
+    
+    public void getFeed(int uID, int timestamp, int pIDList[])
+    {   
+        heapSize = 0;
+        
+        addcandi(users[uID],timestamp);
+        
+        for (int i = 0; i < users[uID].fc ; i++) {
+            int fwid = users[uID].follow[i];
+            addcandi(users[fwid],timestamp);
+        }
+      
+        //heapPrint(heap,heapSize);
+        
+        int index = 0;
+        while( index < 10) {
+            int value = heapPop(timestamp);
+            if( value == -1) {
+                break;
+            }
+            pIDList[index++] = value;
+        }
+        
+    }
+    
+    void addcandi(user u ,int timestamp) {
+        post h = u.postlist.head;
+        while(h != null){                
+            //heapPush(h.pid,timestamp);
+            heapPush(h,timestamp);
+            h = h.next;
+        }
+    }
+    
+    post heap[] = new post[MAX];
+    int heapSize = 0;
+    
+    
+    void heapPrint(int[] heap, int heap_size)
+    {
+        for (int i = 0; i < heap_size; i++)
+        {
+            System.out.print(heap[i] + " ");
+        }
+        System.out.println();
+    }
+    
+    void heapPush(post value, int time)
+    {
+        if (heapSize + 1 > MAX)
+        {
+            return;
+        }
+ 
+        heap[heapSize] = value;
+ 
+        int current = heapSize;
+        //while (current > 0 && heap[current] < heap[(current - 1) / 2]) 
+        //while( current > 0 && isValid(posts[heap[current]], posts[heap[(current - 1) / 2]] , time))
+        while( current > 0 && isValid(heap[current], heap[(current - 1) / 2] , time))
+        {
+            post temp = heap[(current - 1) / 2];
+            heap[(current - 1) / 2] = heap[current];
+            heap[current] = temp;
+            current = (current - 1) / 2;
+        }
+ 
+        heapSize = heapSize + 1;
+    }
+    int heapPop(int time)
+    {
+        if (heapSize <= 0)
+        {
+            return -1;
+        }
+ 
+        post value = heap[0];
+        heapSize = heapSize - 1;
+ 
+        heap[0] = heap[heapSize];
+ 
+        int current = 0;
+        while (current < heapSize && current * 2 + 1 < heapSize)
+        {
+            int child;
+            if (current * 2 + 2 >= heapSize)
+            {
+                child = current * 2 + 1;
+            }
+            else
+            {
+                //child = heap[current * 2 + 1] < heap[current * 2 + 2] ? current * 2 + 1 : current * 2 + 2;
+                child = isValid(heap[current * 2 + 1], heap[current * 2 + 2],time) ? current * 2 + 1 : current * 2 + 2;
+            }
+ 
+            //if (heap[current] < heap[child])
+            if( isValid( heap[current], heap[child],time ))
+            {
+                break;
+            }
+ 
+            post temp = heap[current];
+            heap[current] = heap[child];
+            heap[child] = temp;
+ 
+            current = child;
+        }
+        return value.pid;
+    }   
+    
+    int curTimeStamp;
+    
+    //p 가 1000초 이내라면,
+    boolean isValid(post p, post t , int time) {
+        // TODO Auto-generated method stub
+        int ptime = time - p.timestamp;
+        int ttime = time - t.timestamp;
+        
+        if (ptime <= 1000 && ttime <= 1000) {
+            if (p.like > t.like) return true;
+            else if (p.like == t.like ) { 
+                if (p.timestamp >t.timestamp) {
+                    return true;
+                }
+            }
+        }
+        else if (ptime > 1000 && ttime > 1000){
+            if (p.timestamp > t.timestamp) {
+                return true;
+            }
+        }
+        else if(ptime <= 1000 && ttime > 1000) {
+            if (p.timestamp >t.timestamp) {
+                return true;
+            }
+        }
+        return false;
+    }
+     
 }
