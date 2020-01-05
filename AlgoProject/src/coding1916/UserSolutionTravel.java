@@ -1,6 +1,7 @@
 import java.util.HashMap;
 
-class UserSolution
+
+class UserSolution3
 {
 
     int USERC = 0 ;
@@ -23,70 +24,120 @@ class UserSolution
     
     class area {
         //productlist 가 있다.
-        ll plist;
+    	prioirtyqueue pq;
         int pc; 
         area() { 
-            plist = new ll();
+            pq = new prioirtyqueue();
         }
         
         void add(product p) { 
-            plist.addinsert(p);
+            pq.push(p);
+        }
+        public product getTop() { 
+        	return pq.getTop();
         }
         public product getTopProductID() {
-            if (plist.head.next != null) { 
-                return plist.head.next;
-            }
-            return null;
-        }
-
-        public boolean isExist() {
-            if (plist.head.next != null) { 
-                return true;
-            }
-            return false;
-        }
+        	product p = pq.Peek();
+        	while(p!= null && p.reserve == true) { 
+        		p = pq.pop();
+        	}
+        	if (p == null) return null; 
+        	
+        	return pq.Peek();
+        }        
     }   
     
     //AREA별 Product LIST 관리 
-    class ll { 
-        product head,tail;
+    class prioirtyqueue { 
         
-        ll() { 
-            product h = new product(-1,-1,-1);
-            product t = new product(-1,-1,-1);
-            head = h ;
-            tail = t; 
+        product[] pkgs;
+        int heapSize;
+        
+        prioirtyqueue() {
+        	heapSize = 0;
+        	pkgs = new product[40001];
+        }               
+        public product getTop(){
+        	if (heapSize <= 0) {
+        		return null;
+        	}
+        	return pkgs[0];
         }
         
-        void addinsert(product p) { 
-            product start = head.next;   
-            product last = head;
-            
-            while(start!=null&&start!=tail) { 
-                if (compare(start ,p)) {
-                    product pre = start.prev;                       
-                    pre.next = p ; 
-                    p.prev = pre;
-                    
-                    p.next = start; 
-                    start.prev = p;
-                    return;
-                }
-                
-                last = start;
-                start = start.next;
-            }
-            
-            last.next =  p;
-            p.prev = last;
-            p.next = tail;
-            tail.prev = p;
+        public product Peek()
+        {
+            return pkgs[0];
         }
         
-        boolean compare(product start, product p) {
-            if (start.price > p.price ) return true; 
+        public boolean isQueueEmpty()
+        {
+            return this.heapSize == 0;
+        }
+        
+        public product pop() {
+    		if (heapSize <= 0)
+    		{
+    			return null;
+    		}
+
+    		product value = pkgs[0];
+    		heapSize = heapSize - 1;
+
+    		pkgs[0] = pkgs[heapSize];
+
+    		int current = 0;
+    		while (current < heapSize && current * 2 + 1 < heapSize)
+    		{
+    			int child;
+    			if (current * 2 + 2 >= heapSize)
+    			{
+    				child = current * 2 + 1;
+    			}
+    			else
+    			{
+    				child = compare(pkgs[current * 2 + 1] , pkgs[current * 2 + 2]) ? current * 2 + 1 : current * 2 + 2;
+    			}
+
+    			if (compare(pkgs[current] , pkgs[child]))
+    			{
+    				break;
+    			}
+
+    			product temp = pkgs[current];
+    			pkgs[current] = pkgs[child];
+    			pkgs[child] = temp;
+
+    			current = child;
+    		}
+    		return value;			
+			
+		}
+
+		public void push(product p) {
+			if (heapSize + 1 > 40001)
+			{
+				return;
+			}
+
+			pkgs[heapSize] = p;
+
+			int current = heapSize;
+			while (current > 0 && compare(pkgs[current] , pkgs[(current - 1) / 2])) 
+			{
+				product temp = pkgs[(current - 1) / 2];
+				pkgs[(current - 1) / 2] = pkgs[current];
+				pkgs[current] = temp;
+				current = (current - 1) / 2;
+			}
+			heapSize = heapSize + 1;
+			
+		}
+
+
+		boolean compare(product start, product p) {
+            if (start.price < p.price ) return true; 
             if (start.price == p.price ) { 
-                if ( start.pid > p.pid ) { 
+                if ( start.pid < p.pid ) { 
                     return true;
                 }
             }
@@ -94,12 +145,7 @@ class UserSolution
         }
 
         void print() { 
-            product h = head.next;
-            while(h!=tail) { 
-                System.out.print( "["+ h.pid +"," + h.price +"]" ) ; 
-                h = h.next;
-            }
-            System.out.println();
+           
         }
     }
     
@@ -138,6 +184,8 @@ class UserSolution
             areas[i] = new area();
         }
         
+        productHash = new HashMap<>();
+        
         /*
         for (int i = 0 ; i < 100007 ; i++) {
             product[i] = new product();
@@ -152,11 +200,12 @@ class UserSolution
         users[uid2].addf(uid1);
     }
     
-    HashMap<Integer,product> productHash = new HashMap<>();
+    HashMap<Integer,product> productHash;
     
     //package list 에 넣어둔다  4만 이하 (여기에 힌트) 
     public void add(int pid, int area, int price)
-    {   
+    {
+        //System.out.println("add  p : " + pid + "\ta: " +  area + "\tprice: " + price ); 
         //package 
         product p = new product(pid, area, price);
         
@@ -170,7 +219,7 @@ class UserSolution
     //pa
     public void reserve(int uid, int pid)
     {
-        System.out.println("reserve = " + uid +" , "  +  pid );
+        //System.out.println("reserve = " + uid +" , "  +  pid );
         //product list에서 빼내고
         product p = productHash.get(pid);       
         p.reserve = true;       
@@ -185,37 +234,38 @@ class UserSolution
         // uid와 친구들이 예약한 상품 중 가장많이 예약한 지역
         sort[] sortedArea = getAreaSort(uid);                
         
+        boolean isExist = false; 
         // 해당 area에 상품이 존재하는지 check
-        boolean isExist = areas[sortedArea[0].area].isExist();
+        if ( sortedArea[0].c > 0) { 
+            isExist = true;
+        }
         
         if (isExist) {            
             for (int i = 0; i < sortedArea.length; i++) {
                 // 가장 싼 상품의 id 를 던진다
                 product top = areas[sortedArea[i].area].getTopProductID();
-                while(true) {
-                    if (top.reserve == true) {
-                        top = top.next;                        
-                    }else {                    
-                        break;
-                    }
-                }
-                if (top.pid != -1) {
+                if ( top != null) {
                     return top.pid;
                 }           
             } 
         } else {
-            int minprice = 10000;
-            int minpid = 10000;
-            for (int j = 1; j < AREAC; j++) {
+            int minprice = 1000000000;
+            int minpid = 1000000000;
+            for (int j = 1; j < AREAC; j++) {                
                 product p = areas[j].getTopProductID();
                 if (p != null) {
-                    if (p.price < minprice && p.pid < minpid) {
+                    if (p.price < minprice ) {
                         minprice = p.price;
                         minpid = p.pid;
+                    }else if (p.price == minprice ) {
+                        if (p.pid < minpid) { 
+                            minpid = p.pid;
+                            minprice = p.price;
+                        }
                     }
                 }
             }
-            System.out.println("pid = " + minpid + " price = " + minprice);
+            //System.out.println("pid = " + minpid + " price = " + minprice);
             return minpid;
         }
 
@@ -248,62 +298,46 @@ class UserSolution
         }
         
         //bubble
-        quickSort(0,AREAC-1);
-        /*
+        //quickSort(0,AREAC-1);
+        
         for (int i = 0 ; i < AREAC ; i++) {
             for (int j = 0 ; j < AREAC ; j++) {
-                if ( sorts[i].c > sorts[j].c ) {
+                if ( compare( sorts[i] , sorts[j] )) {
                     sort temp = sorts[i] ;
                     sorts[i] = sorts[j];
                     sorts[j] = temp;
                 }
             }
         }
-        */
+        
+        
         
         //debugging
         for (int j = 0 ; j < AREAC ; j++) { 
             System.out.println( sorts[j].area +  "번째 지역:  " +  sorts[j].c ); 
-        }   
+        } 
+          
         
         return sorts;
        
     }
     
-    void quickSort(int first, int last)
-    {
-        sort temp;       
-        if (first < last)
-        {
-            int pivot = first;
-            int i = first;
-            int j = last;
-
-            while (i < j)
-            {   
-                while (sorts[i].c >= sorts[pivot].c && i < last)
-                {
-                    i++;
+    boolean compare(sort a, sort b) { 
+        if ( a.c > b.c ) { 
+            return true;
+        }else if ( a.c == b.c ) { 
+            product p = areas[ a.area ].getTop();
+            product p1 = areas[ b.area ].getTop();
+            if (p == null || p1 == null) return false;
+            if( p.price == p1.price) { 
+                if ( p.pid < p1.pid){ 
+                    return true;
                 }
-                while (sorts[j].c < sorts[pivot].c)
-                {
-                    j--;
-                }
-                if (i < j)
-                {
-                    temp = sorts[i];
-                    sorts[i] = sorts[j];
-                    sorts[j] = temp;
-                }
+            }else if (p.price < p1.price) { 
+                return true;
             }
-
-            temp = sorts[pivot];
-            sorts[pivot] = sorts[j];
-            sorts[j] = temp;
-
-            quickSort(first, j - 1);
-            quickSort(j + 1, last);
         }
-    }    
-    
+        
+        return false; 
+    } 
 }
