@@ -1,343 +1,300 @@
 import java.util.HashMap;
 
+class UserSolution3 {
+	class user {
+		int fc = 0;
+		int[] friend = new int[21]; // 버그 20개 할당
 
-class UserSolution3
-{
-
-    int USERC = 0 ;
-    int AREAC = 0 ;
-
-    product product[] = new product[100007]; //?
-    
-    class user {
-        int fric = 0 ;
-        int[] fri = new int[21];
-        void addf(int uid) { 
-            fri[fric++] = uid;
-        }
-        
-        int[] area = new int[11];
-        void addArea(int areaid) { 
-            area[areaid] += 1;
-        }
-    }
-    
-    class area {
-        //productlist 가 있다.
-    	prioirtyqueue pq;
-        int pc; 
-        area() { 
-            pq = new prioirtyqueue();
-        }
-        
-        void add(product p) { 
-            pq.push(p);
-        }
-        public product getTop() { 
-        	return pq.getTop();
-        }
-        public product getTopProductID() {
-        	product p = pq.Peek();
-        	while(p!= null && p.reserve == true) { 
-        		p = pq.pop();
-        	}
-        	if (p == null) return null; 
-        	
-        	return pq.Peek();
-        }        
-    }   
-    
-    //AREA별 Product LIST 관리 
-    class prioirtyqueue { 
-        
-        product[] pkgs;
-        int heapSize;
-        
-        prioirtyqueue() {
-        	heapSize = 0;
-        	pkgs = new product[40001];
-        }               
-        public product getTop(){
-        	if (heapSize <= 0) {
-        		return null;
-        	}
-        	return pkgs[0];
-        }
-        
-        public product Peek()
-        {
-            return pkgs[0];
-        }
-        
-        public boolean isQueueEmpty()
-        {
-            return this.heapSize == 0;
-        }
-        
-        public product pop() {
-    		if (heapSize <= 0)
-    		{
-    			return null;
-    		}
-
-    		product value = pkgs[0];
-    		heapSize = heapSize - 1;
-
-    		pkgs[0] = pkgs[heapSize];
-
-    		int current = 0;
-    		while (current < heapSize && current * 2 + 1 < heapSize)
-    		{
-    			int child;
-    			if (current * 2 + 2 >= heapSize)
-    			{
-    				child = current * 2 + 1;
-    			}
-    			else
-    			{
-    				child = compare(pkgs[current * 2 + 1] , pkgs[current * 2 + 2]) ? current * 2 + 1 : current * 2 + 2;
-    			}
-
-    			if (compare(pkgs[current] , pkgs[child]))
-    			{
-    				break;
-    			}
-
-    			product temp = pkgs[current];
-    			pkgs[current] = pkgs[child];
-    			pkgs[child] = temp;
-
-    			current = child;
-    		}
-    		return value;			
-			
+		void addf(final int uid) {
+			friend[fc++] = uid;
 		}
 
-		public void push(product p) {
-			if (heapSize + 1 > 40001)
+		int area[] = new int[11];
+
+		int rc = 0;
+
+		public void addreserve(final product p) {
+			rc++;
+			area[p.area] += 1; //이게 생각 어려움 
+		}
+	}
+
+	class product {
+		int area;
+		int price;
+		int pid;
+		boolean reserve = false;
+	}
+
+	class area {
+
+		int areaid;
+		int pc = 0;
+
+		prioirtyqueue pq;
+
+		area() {
+			pq = new prioirtyqueue();
+		}
+
+		public void addproduct(final product p) {
+			pq.push(p);
+		}
+
+		public product gettop() {
+			product p = pq.getTop();
+			while (p != null && p.reserve == true) {
+				pq.pop();
+				p = pq.getTop();
+			}
+
+			return p;
+
+		}
+	}
+
+	area areas[];
+	user users[];
+	product products[];
+	HashMap prdHash;
+	int AREAS = 0;
+
+	public void init(final int N, final int M) {
+		AREAS = M + 1;
+		users = new user[N + 1];
+		areas = new area[AREAS];
+
+		for (int i = 1; i < N + 1; i++) {
+			users[i] = new user();
+			users[i].addf(i); // 버그 본인 안넣은거
+		}
+		for (int i = 1; i < M + 1; i++) {
+			areas[i] = new area();
+		}
+
+		prdHash = new HashMap<>();
+
+	}
+
+	public void befriend(final int uid1, final int uid2) {
+		users[uid1].addf(uid2);
+		users[uid2].addf(uid1);
+	}
+
+	// package list 에 넣어둔다 4만 이하 (여기에 힌트)
+	public void add(final int pid, final int area, final int price) {
+		final product p = new product();
+		p.pid = pid;
+		p.area = area;
+		p.price = price;
+
+		areas[p.area].addproduct(p);
+
+		prdHash.put(pid, p);
+		return;
+	}
+
+	// pa
+	public void reserve(final int uid, final int pid) {
+
+		final product p = (product) prdHash.get(pid);
+		p.reserve = true;
+		users[uid].addreserve(p);
+
+	}
+
+	class areasort {
+		int cnt;
+		int area;
+	}
+
+	public int recommend(final int uid) {
+		// System.out.println("recommend = " + uid);
+		final areasort[] psort = new areasort[11];
+		for (int i = 0; i < psort.length; i++) {
+			psort[i] = new areasort();
+		}
+
+		// 본인포함이어야 함.uid 친구들이 가장 많이 예약한 지역 : 버그
+		for (int i = 0; i < users[uid].fc; i++) {
+			final int fuserid = users[uid].friend[i];
+			for (int j = 0; j < AREAS; j++) {
+				psort[j].cnt += users[fuserid].area[j];
+				psort[j].area = j;
+			}
+		}
+
+		// sort
+		for (int i = 0; i < AREAS; i++) {
+			final areasort temp = psort[i];
+			int j = i - 1;
+
+			while ((j >= 1) && !compare(temp, psort[j])) // insert sort 주의할점// (!compare)
 			{
+				psort[j + 1] = psort[j];
+				j = j - 1;
+			}
+			psort[j + 1] = temp;
+		}
+
+		/*
+		 * for (int i = 0; i < AREAS; i++) { System.out.println(psort[i].area +
+		 * "=>" + psort[i].cnt); }
+		 */
+
+		// 우선순위 가장 높은 지역에 상품이 존재한다면,
+		if (psort[1].cnt > 0) {
+			for (int i = 1; i < AREAS; i++) {
+				final product p = areas[psort[i].area].gettop();
+				if (p != null) {
+					return p.pid;
+				}
+			}
+
+		} else {
+			int minpid = 1000000000;
+			int minprice = 1000000000;
+
+			for (int i = 1; i < AREAS; i++) {
+				final product p = areas[i].gettop();
+				if (p != null) {
+					if (minprice > p.price) {
+						minprice = p.price;
+						minpid = p.pid;
+						// BUG. 아래 코드 알아차리지 못함 // AREA[0] / AREA[1]
+					} else if (p.price == minprice) {
+						if (p.pid < minpid) {
+							minpid = p.pid;
+							minprice = p.price;
+						}
+					}
+				}
+			}
+
+			return minpid;
+
+		}
+
+		return 0;
+
+	}
+
+	boolean compare(final areasort a, final areasort b) {
+		if (a.cnt < b.cnt) {
+			return true;
+		} else if (a.cnt == b.cnt) {
+			final product p = areas[a.area].gettop();
+			final product p1 = areas[b.area].gettop();
+
+			if (p == null || p1 == null) {
+				return false;
+			}
+			if (p.price == p1.price) {
+				if (p.pid > p1.pid) {
+					return true;
+				}
+			} else if (p.price > p1.price) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// AREA별 Product LIST 관리
+	class prioirtyqueue {
+
+		product[] pkgs;
+		int heapSize;
+
+		prioirtyqueue() {
+			heapSize = 0;
+			pkgs = new product[40001];
+		}
+
+		public product getTop() {
+			if (heapSize <= 0) {
+				return null;
+			}
+			return pkgs[0];
+		}
+
+		public product Peek() {
+			return pkgs[0];
+		}
+
+		public boolean isQueueEmpty() {
+			return this.heapSize == 0;
+		}
+
+		public product pop() {
+			if (heapSize <= 0) {
+				return null;
+			}
+
+			final product value = pkgs[0];
+			heapSize = heapSize - 1;
+
+			pkgs[0] = pkgs[heapSize];
+
+			int current = 0;
+			while (current < heapSize && current * 2 + 1 < heapSize) {
+				int child;
+				if (current * 2 + 2 >= heapSize) {
+					child = current * 2 + 1;
+				} else {
+					child = compare(pkgs[current * 2 + 1], pkgs[current * 2 + 2]) ? current * 2 + 1 : current * 2 + 2;
+				}
+
+				if (compare(pkgs[current], pkgs[child])) {
+					break;
+				}
+
+				final product temp = pkgs[current];
+				pkgs[current] = pkgs[child];
+				pkgs[child] = temp;
+
+				current = child;
+			}
+			return value;
+
+		}
+
+		public void push(final product p) {
+			if (heapSize + 1 > 40001) {
 				return;
 			}
 
 			pkgs[heapSize] = p;
 
 			int current = heapSize;
-			while (current > 0 && compare(pkgs[current] , pkgs[(current - 1) / 2])) 
-			{
-				product temp = pkgs[(current - 1) / 2];
+			while (current > 0 && compare(pkgs[current], pkgs[(current - 1) / 2])) {
+				final product temp = pkgs[(current - 1) / 2];
 				pkgs[(current - 1) / 2] = pkgs[current];
 				pkgs[current] = temp;
 				current = (current - 1) / 2;
 			}
 			heapSize = heapSize + 1;
-			
+
 		}
 
+		boolean compare(final product start, final product p) {
+			if (start.price < p.price)
+				return true;
+			else if (start.price == p.price) {
+				if (start.pid < p.pid) {
+					return true;
+				}
+			}
+			return false;
+		}
 
-		boolean compare(product start, product p) {
-            if (start.price < p.price ) return true; 
-            if (start.price == p.price ) { 
-                if ( start.pid < p.pid ) { 
-                    return true;
-                }
-            }
-            return false;
-        }
+		void print() {
+			System.out.println("area = " + pkgs[0].area);
+			for (int i = 0; i < heapSize; i++) {
+				System.out.print("(" + pkgs[i].pid + "," + pkgs[i].price + ")" + "->");
+			}
+			System.out.println();
+		}
+	}
 
-        void print() { 
-           
-        }
-    }
-    
-    
-    class product {
-        product prev,next;
-        int pid ; 
-        int area;
-        int price;
-        boolean reserve = false;;
-        
-        public product(int pid2, int area2, int price2) {
-            pid = pid2;
-            area = area2;
-            price = price2;
-        }
-    }
-    
-    user[] users;
-    area[] areas;
-    public void init(int N, int M)
-    {
-        //user 초기화 
-        USERC = N+1;
-        AREAC = M+1;
-        users = new user[USERC];
-        areas = new area[AREAC];
-        
-        for (int i = 0 ; i < USERC ; i++) { 
-            users[i] = new user();
-            //자기자신 id 등록 (나중계산쉽게하기위해)
-            users[i].addf(i);
-        }
-        
-        for (int i = 0 ; i < AREAC ; i++) { 
-            areas[i] = new area();
-        }
-        
-        productHash = new HashMap<>();
-        
-        /*
-        for (int i = 0 ; i < 100007 ; i++) {
-            product[i] = new product();
-        }
-        */
-        
-    }
-    
-    public void befriend(int uid1, int uid2)
-    { 
-        users[uid1].addf(uid2);
-        users[uid2].addf(uid1);
-    }
-    
-    HashMap<Integer,product> productHash;
-    
-    //package list 에 넣어둔다  4만 이하 (여기에 힌트) 
-    public void add(int pid, int area, int price)
-    {
-        //System.out.println("add  p : " + pid + "\ta: " +  area + "\tprice: " + price ); 
-        //package 
-        product p = new product(pid, area, price);
-        
-        //area 에 등록된 p (우선순위로 넣는다.) 
-        areas[area].add(p);
-        
-        //product hash 
-        productHash.put(pid, p);
-    }
-    
-    //pa
-    public void reserve(int uid, int pid)
-    {
-        //System.out.println("reserve = " + uid +" , "  +  pid );
-        //product list에서 빼내고
-        product p = productHash.get(pid);       
-        p.reserve = true;       
-        
-        //어따 쓰는물건인고
-        users[uid].addArea( p.area );
-    }
-    
-    public int recommend(int uid)
-    {
-        System.out.println("recommend =  " + uid ); 
-        // uid와 친구들이 예약한 상품 중 가장많이 예약한 지역
-        sort[] sortedArea = getAreaSort(uid);                
-        
-        boolean isExist = false; 
-        // 해당 area에 상품이 존재하는지 check
-        if ( sortedArea[0].c > 0) { 
-            isExist = true;
-        }
-        
-        if (isExist) {            
-            for (int i = 0; i < sortedArea.length; i++) {
-                // 가장 싼 상품의 id 를 던진다
-                product top = areas[sortedArea[i].area].getTopProductID();
-                if ( top != null) {
-                    return top.pid;
-                }           
-            } 
-        } else {
-            int minprice = 1000000000;
-            int minpid = 1000000000;
-            for (int j = 1; j < AREAC; j++) {                
-                product p = areas[j].getTopProductID();
-                if (p != null) {
-                    if (p.price < minprice ) {
-                        minprice = p.price;
-                        minpid = p.pid;
-                    }else if (p.price == minprice ) {
-                        if (p.pid < minpid) { 
-                            minpid = p.pid;
-                            minprice = p.price;
-                        }
-                    }
-                }
-            }
-            //System.out.println("pid = " + minpid + " price = " + minprice);
-            return minpid;
-        }
-
-        return -1;
-        
-    }
-    
-    class sort{ 
-        int area = -1;
-        int c = 0 ; 
-        sort(int i) {
-            area = i;
-        }
-    }    
-    
-    sort[] sorts;
-    
-    private sort[] getAreaSort(int uid ) {
-        sorts = new sort[AREAC];
-        //sort 된 area 로 담기위한 초기화 
-        for (int i = 0 ; i < AREAC ; i++) { 
-            sorts[i] = new sort(i);
-        }
-        
-        for (int i = 0 ;  i < users[uid].fric ;i++) {
-            int fid = users[uid].fri[i];
-            for (int j = 0 ; j < AREAC ; j++) { 
-                sorts[j].c +=  users[fid].area[j]; 
-            }
-        }
-        
-        //bubble
-        //quickSort(0,AREAC-1);
-        
-        for (int i = 0 ; i < AREAC ; i++) {
-            for (int j = 0 ; j < AREAC ; j++) {
-                if ( compare( sorts[i] , sorts[j] )) {
-                    sort temp = sorts[i] ;
-                    sorts[i] = sorts[j];
-                    sorts[j] = temp;
-                }
-            }
-        }
-        
-        
-        
-        //debugging
-        for (int j = 0 ; j < AREAC ; j++) { 
-            System.out.println( sorts[j].area +  "번째 지역:  " +  sorts[j].c ); 
-        } 
-          
-        
-        return sorts;
-       
-    }
-    
-    boolean compare(sort a, sort b) { 
-        if ( a.c > b.c ) { 
-            return true;
-        }else if ( a.c == b.c ) { 
-            product p = areas[ a.area ].getTop();
-            product p1 = areas[ b.area ].getTop();
-            if (p == null || p1 == null) return false;
-            if( p.price == p1.price) { 
-                if ( p.pid < p1.pid){ 
-                    return true;
-                }
-            }else if (p.price < p1.price) { 
-                return true;
-            }
-        }
-        
-        return false; 
-    } 
 }
