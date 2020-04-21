@@ -39,15 +39,16 @@ class UserSolution4 {
 		class ll {
 			dir h, t;
 
-			void add(dir d) {
+			dir add(dir d) {
 				if (h == null) {
 					h = d;
 					t = d;
-					return;
+					return d;
 				}
 				t.ne = d;
 				d.pe = t;
 				t = d;
+				return d;
 			}
 
 			// 맞나
@@ -107,10 +108,11 @@ class UserSolution4 {
 			root = new dir(r);
 		}
 
-		void mkdir(dir d, char[] name) {
+		dir mkdir(dir d, char[] name) {
 			dir c = new dir(name);
 			c.pa = d;
 			d.childs.add(c);
+			return c;
 		}
 
 		boolean isroot(char[] path, char c) {
@@ -151,12 +153,21 @@ class UserSolution4 {
 			}
 
 			dir f = r.childs.find(p);
-			findrecu(f, path, i);
+			findrecu(f, path, i+1);
 		}
 
 		void rm(dir d) {
 			dir parent = d.pa;
-			parent.childs.delete(d);
+			
+			
+            dir he = parent.childs.h;
+            while (he != null) {
+                if (mstrcmp(he.name, d.name) == 0) {
+                    parent.childs.delete(he);
+                    break;
+                }
+                he = he.ne;
+            }
 		}
 
 		void print(dir d, int dep) {
@@ -195,6 +206,18 @@ class UserSolution4 {
 			d.childs.add(s);
 		}
 
+		public void cp(dir sr, dir dt) {
+			if (sr == null) return;
+			
+			dir c = this.mkdir(dt, sr.name);
+			
+			dir he = sr.childs.h;
+			while(he!=null) {
+				cp(he,c);
+				he = he.ne;
+			}
+		}
+
 	}
 
 	tree mytree;
@@ -215,7 +238,10 @@ class UserSolution4 {
 
 	void cmd_cp(char[] srcPath, char[] dstPath) {
 		System.out.println("cmd_cp");
-		//dir d = mytree.find(path);
+		dir sr = mytree.find(srcPath);
+		dir dt = mytree.find(dstPath);
+		mytree.cp(sr,dt);
+		mytree.print(mytree.root, 0);
 		//mytree.rm(d);
 	}
 
@@ -223,12 +249,13 @@ class UserSolution4 {
 		System.out.println("cmd_mv");
 		dir s = mytree.find(srcPath);
 		dir d = mytree.find(dstPath);
-
+		System.out.println("T");
 		mytree.mv(s, d);
+		mytree.print(mytree.root, 0);
 	}
 
 	int cmd_find(char[] path) {
-		System.out.println("cmd_find");
+		System.out.println("cmd_find " + new String(path));
 		dir d = mytree.find(path);
 		mytree.cnt = 0;
 		mytree.getcount(d);
