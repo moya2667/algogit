@@ -202,8 +202,10 @@ class UserSolution4 {
 
 		public void mv(dir s, dir d) {
 			dir parent = s.pa;
-			parent.childs.delete(s);
+			parent.childs.delete(s); 
+			
 			d.childs.add(s);
+			d = s.pa ; //consider 
 		}
 
 		public void cp(dir sr, dir dt) {
